@@ -1,0 +1,124 @@
+This chapter describes the lexis, the syntax, and the semantics of TBASIC. In other words, this chapter describes which words are good, how they can be jumbled up, and what the hell they could even mean. 
+
+\section{Line Format}
+
+Program lines in BASIC program have the following format:
+
+\forceindent{\monofont nnnnn BASIC-statement <carriage return>} \
+
+Only one BASIC statement may be placed on a line. A program line always begins with a line number and ends with a carriage return.
+
+
+\section{Lexical Conventions}
+
+\emph{Names} (also called \emph{identifiers}) in TBASIC can be any string of letters, digits, and underscores, not beginning with a digit. Identifiers are used to name variables.
+
+The following \emph{keywords} are reserved and cannot be used as names:
+
+\begin{multicols}{6}
+%{\condensedfont%
+ABORT\par
+ABORTM\par
+ABS\par
+AND\par %operator
+ASC\par
+BACKCOL\par
+BEEP\par
+CBRT\par
+CEIL\par
+CHR\par
+CLR\par
+CLS\par
+COS\par
+DEF\par
+DIM\par
+DO\par
+END\par
+FLOOR\par
+FN\par
+FOR\par
+GET\par
+GO\par
+GOSUB\par
+GOTO\par
+HTAB\par
+IF\par
+INPUT\par
+INT\par
+INV\par
+LEFT\par
+LEN\par
+LIST\par
+LOAD\par
+LOG\par
+MAX\par
+MID\par
+MIN\par
+MINUS\par %operator
+NEW\par
+NEXT\par
+NOT\par %operator
+OR\par %operator
+PRINT\par
+REM\par
+RETURN\par
+RIGHT\par
+RND\par
+ROUND\par
+RUN\par
+SAVE\par
+SCROLL\par
+SGN\par
+SIN\par
+SIZEOF\par %operator
+SQRT\par
+STEP\par %operator
+STR\par
+TAB\par
+TAN\par
+TEXTCOL\par
+THEN\par
+TO\par %operator
+TEMIT\par
+VAL\par
+VTAB\par
+XOR\par %operator
+%}%
+\end{multicols}
+
+TBASIC is a case-insensitive language, and so is the reserved word.
+
+The following strings denote other tokens:
+
+\begin{multicols}{6}
+%{\condensedfont%
+$>$$>$$>$\par
+$<$$<$\par
+$>$$>$\par
+|\par
+\&\par
+!\par
+;\par
+$=$$=$\par
+$>$\par
+$<$\par
+$<$$=$\par
+$=$$<$\par
+$>$$=$\par
+$=$$>$\par
+!$=$\par
+$<$$>$\par
+$>$$<$\par
+$=$\par
+$:$$=$\par
+$^\wedge$\par
+*\par
+/\par
+$+$\par
+$-$\par
+\%\par
+(\par
+)\par
+,\par
+%}
+\end {multicols}

@@ -1,0 +1,60 @@
+This section describes built-in functions for the TBASIC.
+
+\section{Synopsis}
+
+\subsection{ABORT} --- halts current program
+\subsection{ABORTM} \emph{reason} --- halts current program with message
+\subsection{ABS} \emph{number} --- returns absolute value for the number
+\subsection{ASC} \emph{character} --- returns ASCII code for the character
+\subsection{BACKCOL} \emph{number} --- sets background colour of the terminal (if applicable)
+\subsection{BEEP} \emph{pattern} --- make computer produce beeping sound (does not work with CC)
+\subsection{CBRT} \emph{number} --- returns cubic root of the number
+\subsection{CEIL} \emph{number} --- returns round-up of the number
+\subsection{CHR} \emph{ASCII-code} --- returns character for the code
+\subsection{CLR} --- deletes all variables declared
+\subsection{CLS} --- clears screen buffer (if supported)
+\subsection{COS} \emph{number} --- returns trigonometric cosine for the number
+\subsection{DEF FN} \emph{name}, \emph{code} --- defines new function
+\subsection{DIM} \emph{name}, \emph{(d1[, d2[, d3\ldots]])} --- defines new array with given dimensions
+\subsection{END} --- successfully exits program
+\subsection{FLOOR} \emph{number} --- returns round-down of the number
+\subsection{FOR} \emph{a = x FROM y[ STEP z]} --- starts counted loop with counter \emph{a} that goes from \emph{x} to \emph{y}, with optional step. Use NEXT \emph{a} to make a loop
+\subsection{GET} \emph{variable[, variable\ldots]} --- get a single character from the keyboard and saves the code of the character to the given variable(s)
+\subsection{GOSUB} \emph{line} --- jumps to a subroutine. Use RETURN to jump back
+\subsection{GOTO} \emph{line} --- jumps to a line
+\subsection{HTAB} \emph{amount} --- moves output cursor horizontally by given amount (if applicable)
+\subsection{IF} \emph{condition} THEN \emph{command} --- evaluates condition and executes command if the condition is true
+\subsection{INPUT} \emph{TODO: Future feature}
+\subsection{INT} \emph{number} --- returns integer part of the number
+\subsection{INV} \emph{number} --- returns (1.0 / number)
+\subsection{LEFT} \emph{string}, \emph{number} --- returns substring of leftmost \emph{number} characters
+\subsection{LEN} \emph{string} --- returns length of the string
+\subsection{LIST} \emph{[from[, to]]} --- prints out commands that have entered (shell function)
+\subsection{LOAD} \emph{path} --- loads the file as a command (shell function)
+\subsection{LOG} \emph{number} --- returns natural logarithm of the number
+\subsection{MAX} \emph{number, number[, \ldots]]} --- returns the biggest of the numbers
+\subsection{MID} \emph{string}, \emph{start}, \emph{end} --- returns substring of the string
+\subsection{MIN} \emph{number, number[, \ldots]]} --- returns the smallest of the numbers
+\subsection{NEW} --- deletes all the commands that have entered (shell function)
+\subsection{NEXT} \emph{variable} --- advances variable which is used by FOR loop
+\subsection{PRINT} \emph{string} --- prints string to the terminal
+\subsection{REM} --- marks current line as remarks, or ``comments''
+\subsection{RETURN} --- returns subroutine called by GOSUB
+\subsection{RIGHT} \emph{string}, \emph{number} --- returns substring of rightmost \emph{number} characters
+\subsection{RND} --- returns random decimal number that is $ 0.0 \leq n < 1.0 $
+\subsection{ROUND} --- returns half-up of the number
+\subsection{RUN} --- executes the commands that have entered (shell function)
+\subsection{SAVE} \emph{path} --- saves the command that have entered to the file (shell function)
+\subsection{SCROLL} \emph{amount} --- scrolls the terminal by given amount
+\subsection{SGN} \emph{number} --- returns sign of the number; $ -1.0 $ for $ n < 0 $, $ 1.0 $ for $ n > 0 $, $ 0.0 $ otherwise.
+\subsection{SIN} \emph{number} --- returns trigonometric sine for the number
+\subsection{SQRT} \emph{number} --- returns square root of the number
+\subsection{STR} \emph{number} --- returns string representation of the numerical value
+\subsection{TAB} \emph{amount} --- same as HTAB
+\subsection{TAN} \emph{number} --- returns trigonometric tangent for the number
+\subsection{TEXTCOL} \emph{number} --- sets text colour of the terminal (if applicable)
+\subsection{TEMIT} \emph{frequency}, \emph{length} --- emits tone of given frequency for given length (in seconds) (does not work with CC)
+\subsection{VAL} \emph{string} --- returns numerical representation of the string
+\subsection{VTAB} \emph{amount} --- moves output cursor vertically by given amount (if applicable)
+
+\section{In-depth description}

@@ -1,0 +1,153 @@
+% !TEX TS-program = LuaLaTeX
+
+%% Copyright (c) 2016 Torvald (minjaesong) and the contributors. Freely available under the terms of the MIT License.
+
+\documentclass[10pt, stock, openany]{memoir}
+
+
+\usepackage{fontspec}
+\setmainfont[Ligatures=TeX]{TeX Gyre Heros}
+\newfontfamily\condensedfont{TeX Gyre Heros Cn}
+\newfontfamily\monofont{TeX Gyre Cursor}
+
+
+
+
+\usepackage{fapapersize}
+\usefapapersize{148mm,210mm,15mm,15mm,20mm,15mm} % A5 paper
+\usepackage{afterpage}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{ltablex}
+\usepackage{parskip}
+\usepackage{multicol}
+
+\usepackage{lineno} % debug
+
+
+\makeatletter
+\newlength{\mytextsize}
+\setlength{\mytextsize}{\f@size pt}
+\newlength{\mybaselineskip}
+\setlength{\mybaselineskip}{1.3\mytextsize}
+\makeatother
+\setlength{\baselineskip}{\mybaselineskip}
+
+\usepackage[fontsize=\mytextsize,baseline=\baselineskip,lines=38]{grid}
+
+\frenchspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+\setsecnumdepth{subsection}
+
+
+%% Idioms %%
+\hyphenation{Com-put-er-Craft}
+\hyphenation{O-pen-Com-put-ers}
+\hyphenation{T-BASIC}
+
+
+\newcommand\forceindent{\hskip1.5em}
+
+
+% Title styling
+\pretitle{\begin{flushright}}
+\posttitle{\par\end{flushright}}
+\preauthor{\begin{flushright}}
+\postauthor{\par\end{flushright}}
+
+% new sections are new page
+%\let\oldsection\chapter
+%\renewcommand\chapter{\clearpage\oldsection}
+
+% chapter title -- no now page after
+\renewcommand\chapterheadstart{} % kill the drop
+\renewcommand\afterchapternum{\vskip 0.5em} % space between number and title
+\setlength{\afterchapskip}{\baselineskip} % reduce space after chapter title
+\makeatletter
+\renewcommand\memendofchapterhook{%
+\m@mindentafterchapter\@afterheading}
+\makeatother
+
+% section/chapter header spacing
+\let\oldsection\section
+\renewcommand{\section}[1]{\oldsection{#1} \vskip\baselineskip}
+
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\newcommand{\mono}[1]{{\monofont #1}}
+\newcommand{\monobf}[1]{{\monofont \textbf{#1}}}
+
+
+%\aliaspagestyle{part}{empty}
+%\aliaspagestyle{chapter}{empty}
+
+
+% The title
+\newcommand{\tbasver}{0.4}
+\newcommand{\theedition}{First Edition}
+\newcommand{\oreallypress}{\large\textbf{O'REALLY\raisebox{1ex}{\scriptsize ?}} \normalsize Press}
+
+\title{\HUGE\textbf{TERRAN BASIC \\ REFERENCE MANUAL} \\ \Large \vspace{1em} For Version \tbasver \\ \vspace{7mm} \theedition}
+\date{}
+\author{}
+\hypersetup{
+	pdfauthor={Torvald et al.},
+	pdftitle={Terran BASIC Reference Manual, \theedition\ (BASIC version \tbasver)},
+	unicode=true
+}
+
+\begin{document}
+\begin{titlingpage}
+\maketitle{}
+\vfill
+\oreallypress
+\end{titlingpage}
+
+\setcounter{page}{3}
+
+\tableofcontents*
+
+
+%\linenumbers % debug
+
+\openright
+\chapter{Introduction}
+\input{intro}
+
+\openany
+\chapter{Basic Concepts}
+\input{concepts}
+
+\chapter{The Language}
+\input{thelanguage}
+
+\chapter{Commands and Statements}
+
+
+\chapter{Operators}
+\input{operators}
+
+
+\chapter{Functions}
+\input{functions}
+
+
+\chapter{Implementation}
+\input{implementation}
+
+%% Bibliography %%
+% http://www.commodore.ca/manuals/pdfs/Commodore_Basic_4_Users_Reference%20Manual.pdf
+% http://www.lua.org/manual/5.2/contents.html#contents
+% https://en.wikipedia.org/wiki/BASIC
+
+
+\chapter{Index}
+
+
+
+
+\afterpage{\pagestyle{empty}\null\newpage}
+
+\end{document}

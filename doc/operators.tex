@@ -1,0 +1,44 @@
+This chapter describes operators that can be used in TBASIC.
+
+\section{Overview}
+
+There are 33 operators in TBASIC version \tbasver.
+
+\section{Precedence}
+
+Operators has something called \emph{precedence}. It's not something hard despite of its name (especially if you are not a native English speaker, like me). It's just a thing that describes our language programmatically\footnote{in computer language}, which goes like \emph{multiplication comes before the addition and subtraction}.
+
+\begin{tabularx}{\textwidth}{c X}
+	\textbf{Order} & \textbf{Operators}
+	\\
+	\endhead
+	1 & $>$$>$$>$\quad $<$$<$\quad $>$$>$\quad |\quad \&\quad XOR\quad ! \\ 
+	2 & ; \\ 
+	3 & SIZEOF \\ 
+	4 & $=$$=$\quad $>$\quad $<$\quad $<$$=$\quad $=$$<$\quad $>$$=$\quad $=$$>$\quad  \\ 
+	5 & !$=$\quad $<$$>$\quad $>$$<$ \\ 
+	6 & $=$\quad :$=$ \\ 
+	7 & AND\quad OR\quad NOT \\ 
+	8 & $^\wedge$ \\ 
+	9 & *\quad /\quad $+$\quad $-$ \\ 
+	10 & \% \\ 
+	11 & TO\quad STEP \\ 
+	12 & MINUS
+\end{tabularx}
+
+\section{Precautions}
+
+Because of the way the language is desingned\footnote{don't write like \monobf{1+3*2+4/7}, they look hideous}, you must be careful when using $ - $ operator.
+
+\begin{tabularx}{\textwidth}{l l X}
+	\textbf{Code} & \textbf{Evaluation} & \textbf{Remarks}
+	\\
+	\endhead
+	\mono{FOO - 1} & subtraction(FOO, 1) & Works normally
+	\\
+	\mono{FOO-1} & FOOMINUS1 & Syntax error
+\end{tabularx}
+
+\section{Synopsis}
+
+\subsection{SIZEOF} \emph{array} returns size of the array
