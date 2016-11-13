@@ -37,9 +37,14 @@ Syntax of the TBASIC is heavily influenced by [Commodore 64 BASIC](https://www.c
 
 ## How to Contribute
 
+### Code
 You clone it, make it great, and make a pull request.
 
-If you have suggestions/bugs, report them to Issue Tracker.
+### Documentation
+You can also help improving the documentation by adding missing texts, correcting my bad English (if any), or making a translation for non-English speaker like me. Don't know how to use TeX? Just leave them as plain text/MS Word/Rich Text Format and I'll take care of them. (Note: HWP is not to be accepted. C'mon, what the f--k is HWP?)
+
+### In general
+If you have suggestions/bugs, feel free to report them to Issue Tracker.
 
 
 ## How it works
