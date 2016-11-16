@@ -43,6 +43,54 @@ Because of the way the language is desingned\footnote{don't write like \monobf{1
 	\mono{FOO-1} & FOOMINUS1 & Syntax error
 \end{tabularx}
 
-\section{Synopsis}
 
-\subsection{SIZEOF} \emph{array} returns size of the array
+\section{Arithmetic Operators}
+
+\subsection{PLUS} \emph{number} $+$ \emph{number} --- adds two numbers
+\subsection{MINUS} \emph{number} $-$ \emph{number} --- subtracts two numbers
+\subsection{TIMES} \emph{number} * \emph{number} --- multiplies two numbers
+\subsection{DIVIDE} \emph{number} / \emph{number} --- divides two numbers
+\subsection{MODULO} \emph{number} \% \emph{number} --- gets modulo (remainder) of two numbers
+\subsection{POWEROF} \emph{number a} $^\wedge$ \emph{number b} --- gets \emph{a} to the power of \emph{b}, or $a ^b$
+
+
+\section{Logical Operators}
+
+\subsection{AND} \emph{condition 1} AND \emph{condition 2} --- returns \textbf{TRUE} if both contidions (boolean value) are true; false otherwise
+\subsection{OR} \emph{condition 1} OR \emph{condition 2} --- returns \textbf{TRUE} if one or more conditions (boolean value) are true; \textbf{FALSE} if both conditions are false
+\subsection{NOT} NOT \emph{condition} --- negates condition (boolean value)
+
+
+\section{Relational Operators}
+
+\subsection{EQUALTO} \emph{number} $=$$=$ \emph{number} --- returns \textbf{TRUE} if two numbers represent same quantity; \textbf{FALSE} otherwise
+\subsection{NOTEQUALTO} \emph{number} !$=$ \emph{number} --- returns \textbf{TRUE} if two numbers represent different quantity; \textbf{FALSE} otherwise; aliases: $<$$>$, $>$$<$
+\subsection{GREATERTHAN} \emph{number a} $>$ \emph{number b} --- returns \textbf{TRUE} if $a > b$ is satisfied; \textbf{FALSE} otherwise
+\subsection{LESSTHAN} \emph{number a} $<$ \emph{number b} --- returns \textbf{TRUE} if $a < b$ is satisfied; \textbf{FALSE} otherwise
+\subsection{GEQTHAN} \emph{number a} $>$$=$ \emph{number b} --- returns \textbf{TRUE} if $a \geq b$ is satisfied; \textbf{FALSE} otherwise; alias: $=$$<$
+\subsection{LEQTHAN} \emph{number a} $<$$=$ \emph{number b} --- returns \textbf{TRUE} if $a \leq b$ is satisfied; \textbf{FALSE} otherwise; alias: $=$$>$
+
+
+\section{Assignment Operators}
+
+\subsection{AS} \emph{variable} $=$ \emph{value} --- assign \emph{value} to \emph{variable}; alias: :$=$
+
+
+\section{Bitwise Operators}
+
+\subsection{BAND} \emph{integer} \& \emph{integer} --- performs bitwise AND on two integers
+\subsection{BOR} \emph{integer} | \emph{integer} --- performs bitwise OR on two integers
+\subsection{BNOT} ! \emph{integer} --- performs bitwise NOT on integer
+\subsection{BXOR} \emph{integer} XOR \emph{integer} --- performs bitwise XOR on two integers
+\subsection{LSHIFT} \emph{integer} $<$$<$ \emph{offset} --- performs left shift on \emph{integer} by \emph{offset}
+\subsection{RSHIFT} \emph{integer} $>$$>$ \emph{offset} --- performs signed right shift on \emph{integer} by \emph{offset}; if leftmost bit is 1, bits on the left side are padded with 1
+\subsection{URSHIFT} \emph{integer} $>$$>$$>$ \emph{offset} --- performs unsigned right shift on \emph{integer} by \emph{offset}
+
+
+\section{Miscellaneous Operators}
+
+\subsection{CONCAT} \emph{string} ; \emph{string} --- concatenates two strings
+\subsection{MINUS} $-$\emph{number} --- negates \emph{number}, or $-n$
+\subsection{SIZEOF} SIZEOF \emph{array} --- returns size of array
+\subsection{TO} \emph{number} TO \emph{number} --- creates integer sequence of specified range; \mono{1 TO 4} will create an array of \emph{1, 2, 3, 4}; \mono{8 TO 3} will create \emph{8, 7, 6, 5, 4, 3}
+\subsection{STEP} \emph{int array} STEP \emph{number} --- filters input array such that every $1+n$th number is remained; \mono{1 TO 10 STEP 3} will create an array of {1, 4, 7, 10}
