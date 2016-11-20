@@ -3,6 +3,20 @@
 This is not an up-goer art! Brought to you by _O'Really? Press_.
 
 
+Every job is done within ```TBASEXTN.lua```. If you don't have one, make new one, and enter these lines and save:
+
+
+    -- TBASIC extension
+    
+    -- these are utilities. Do not delete these lines
+    local __assert      = _G._TBASIC.__assert
+    local __assertlhand = _G._TBASIC.__assertlhand
+    local __assertrhand = _G._TBASIC.__assertrhand
+    local __checknumber = _G._TBASIC.__checknumber
+    local __checkstring = _G._TBASIC.__checkstring
+    -- end of utilities
+
+
 ## Usual things that people should follow
 
 To check if it's a number, you use ```__checknumber```. To check if it's letters, you use ```__checkstring```. To check the type you'll get, you use ```__assert```.
@@ -17,7 +31,7 @@ You will be dealing with something called ```_TBASIC._FNCTION``` and ```_TBASIC.
 
 ## To make it understand your new sets of marks
 
-Much the same as adding *word*s, but there's some different parts. You will add your *mark*s to ```_TBASIC._OPERATR``` and ```opprecedence```. Watch that ```opprecedence``` is ``````ordered``````, and you should know the order of your new *mark*s — which mark comes before yours and which comes after. Think hard that order and add your *mark* to its right place. If it's the "right-to-left" thing, also add yours to ```opassoc.rtl```.
+Much the same as adding *word*s, but there's some different parts. You will add your *mark*s to ```_TBASIC._OPERATR``` and ```opprecedence```. Watch that ```opprecedence``` is *ordered*, and you should know the order of your new *mark*s — which mark comes before yours and which comes after. Think hard that order and add your *mark* to its right place. If it's the "right-to-left" thing, also add yours to ```opassoc.rtl```.
 
 
 ## Just tell me how to do that!
@@ -26,14 +40,17 @@ Let's say you want to add a word ``````UPGOER``````. What it does is it takes a 
 
 Here's how it's done:
 
-1. Add ```UPGOER``` to ```_TBASIC._FNCTION```.
-2. Add this, ```UPGGOER = {_fnupgoer, 1}```, to ```_TBASIC.LUAFN```. Number ```1``` says it will take that number of things to do something.
-3. Now in any lines upper than the line ```_TBASIC.LUAFN``` is, type this:
-
+0. Open ```TBASEXTN.lua```.
+1. Enter this:
+        
         local function _fnupgoer(n)
             print("Up-goer "..__checknumber(n).." goes up!")
         end
         
+   at the bottom.
+        
+2. Add ```"UPGOER"``` to ```_TBASIC._FNCTION``` (enter this: ```table.insert(_TBASIC._FNCTION, "UPGOER")``` to the next line)
+3. Add  ```{_fnupgoer, 1}``` to ```_TBASIC.LUAFN```. Number ```1``` says it will take that number of things to do something. (enter this: ```_TBASIC.LUAFN.UPGOER = {_fnupgoer, 1}``` to the next line)
 4. Done!
 
 
@@ -43,4 +60,4 @@ Here's how it's done:
 
 * ```__checkstring(letters)``` gives you letters ```letters``` if it can be written as letters.
 
-* ```__assert(thing, type)``` will check type of ```thing``` is a ```type```. If it is, computer will move on. If not, it will stop and say something.
+* ```__assert(thing, type)``` will check the type of ```thing``` is a ```type```. If it is, computer will move on. If not, it will stop and say something.

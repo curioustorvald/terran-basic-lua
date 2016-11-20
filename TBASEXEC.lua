@@ -480,6 +480,8 @@ end
 
 -- END OF LEXER ---------------------------------------------------------------
 
+_TBASIC.SHOWLUAERROR = false
+
 local testprogram = nil
 
 

@@ -212,9 +212,6 @@ function string.hash(str)
 	return hash
 end
 
---sort builtin keywords list
-table.sort(_TBASIC._FNCTION, function(a, b) return string.hash(a) < string.hash(b) end)
-
 _G._TBASIC._INTPRTR.RESET = function()
 	_TBASIC.__appexit = false
 	_G._TBASIC._INTPRTR.PROGCNTR = 0
@@ -290,6 +287,14 @@ local function __checkstring(arg)
 	local strarg = tostring(arg)
 	return strarg:byte(1) == 126 and strarg:sub(2, #strarg) or strarg
 end
+
+_G._TBASIC.__assert      = __assert
+_G._TBASIC.__assertlhand = __assertlhand
+_G._TBASIC.__assertrhand = __assertrhand
+_G._TBASIC.__checknumber = __checknumber
+_G._TBASIC.__checkstring = __checkstring
+
+
 
 
 
@@ -969,7 +974,27 @@ end
 
 -- INIT -----------------------------------------------------------------------
 
+-- load extensions
+local status, err = pcall(
+	function()
+		if os and os.loadAPI then -- ComputerCraft
+			os.loadAPI "TBASEXTN.lua"
+		else
+			require "TBASEXTN"
+		end
+	end
+)
+if err then
+	error(err)
+end
+
+
+--sort builtin keywords list
+table.sort(_TBASIC._FNCTION, function(a, b) return string.hash(a) < string.hash(b) end)
+
+
 _G._TBASIC._INTPRTR.RESET()
+
 
 
 --[[
