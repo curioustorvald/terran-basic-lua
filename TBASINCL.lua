@@ -146,7 +146,7 @@ _G._TBASIC._FNCTION = {
 	"CBRT", -- cubic root
 	"MAX", "MIN",
 	"INV", -- returns (1.0 / arg)
-	-- string functions
+	-- string manipulation
 	"LEN",
 	"LEFT", -- just like in Excel
 	"MID", --  -- just like in Excel (substring)
@@ -419,6 +419,121 @@ local function _fnnext(...)
 	end
 end
 
+local function _fnabs(n)
+	return math.abs(__checknumber(n))
+end
+
+local function _fnsin(n)
+	return math.sin(math.deg(__checknumber(n)))
+end
+
+local function _fncos(n)
+	return math.cos(math.deg(__checknumber(n)))
+end
+
+local function _fntan(n)
+	return math.tan(math.deg(__checknumber(n)))
+end
+
+local function _fnascii(char)
+	return __checkstring(char):byte(1)
+end
+
+local function _fncbrt(n)
+	return __checknumber(n)^3
+end
+
+local function _fnceil(n)
+	return math.ceil(__checknumber(n))
+end
+
+local function _fnchar(code)
+	return string.char(__checknumber(code))
+end
+
+local function _fnfloor(n)
+	return math.floor(__checknumber(n))
+end
+
+local function _fngetkeycode(...)
+	-- TODO get a single character from the keyboard and saves the code of the character to the given variable(s)
+end
+
+local function _fnint(n)
+	num = __checknumber(n)
+	return num >= 0 and math.floor(n) or math.ceil(n)
+end
+
+local function _fnmultinv(n) -- multiplicative invert
+	return 1.0 / __checknumber(n)
+end
+
+local function _fnsubstrleft(str, n)
+	return __checkstring(str):sub(1, __checknumber(n))
+end
+
+local function _fnlen(str)
+	return #str
+end
+
+local function _fnloge(n)
+	return math.log(__checknumber(n))
+end
+
+local function _fnmax(...)
+	local max = -math.huge
+	for _, n in ipairs({...}) do
+		if max < n then max = n end
+	end
+	return max
+end
+
+local function _fnsubstr(str, left, right)
+	return __checkstring(str):sub(__checknumber(left), __checknumber(right))
+end
+
+local function _fnmin(...)
+	local min = math.huge
+	for _, n in ipairs({...}) do
+		if min > n then max = n end
+	end
+	return min
+end
+
+local function _fnsubstrright(str, n)
+	return __checkstring(str):sub(1, -__checknumber(n))
+end
+
+local function _fnrand()
+	return math.random()
+end
+
+local function _fnround(n)
+	return math.floor(__checknumber(n) + 0.5)
+end
+
+local function _fnsign(n)
+	local num = __checknumber(n)
+	return num > 0 and 1.0 or num < 0 and -1.0 or 0.0
+end
+
+local function _fnsqrt(n)
+	return __checknumber(n)^2
+end
+
+local function _fntostring(n)
+	return tostring(__checknumber(n))
+end
+
+local function _fntonumber(s)
+	if tonumber(s) then return s end
+	return tonumber(__checkstring((s))
+end
+
+local function _fntan(n)
+	return math.tan(__checknumber(n)) end
+end
+
 
 
 
@@ -669,10 +784,37 @@ _G._TBASIC.LUAFN = {
 	NEXT    = {_fnnext, vararg},
 	-- stdio
 	PRINT   = {_fnprint, 1},
+	-- mathematics
+	ABS     = {_fnabs, 1},
+	CBRT    = {_fncbrt, 1},
+	CEIL    = {_fnceil, 1},
+	COS     = {_fncos, 1},
+	FLOOR   = {_fnfloor, 1},
+	INT     = {_fnint, 1},
+	INV     = {_fnmultinv, 1},
+	LOG     = {_fnloge, 1},
+	MAX     = {_fnmax, vararg},
+	MIN     = {_fnmin, vararg},
+	RND     = {_fnrand, 1},
+	ROUND   = {_fnround, 1},
+	SGN     = {_fnsign, 1},
+	SIN     = {_fnsin, 1},
+	SQRT    = {_fnsqrt, 1},
+	TAN     = {_fntan, 1},
+	-- string manipulation
+	LEFT    = {_fnsubstrleft, 2},
+	LEN     = {_fnlen, 1},
+	MID     = {_fnsubstr, 3},
+	RIGHT   = {_fnsubstrright, 2},
+	-- type conversion
+	ASC     = {_fnascii, 1},
+	CHR     = {_fnchar, 1},
+	STR     = {_fntostring, 1},
+	VAL     = {_fntonumber, 1},
 	---------------
 	-- operators --
 	---------------
-	[";"]  = {_opconcat, 2},
+	[";"]   = {_opconcat, 2},
 	["+"]   = {_opplus, 2},
 	["*"]   = {_optimes, 2},
 	["-"]   = {_opminus, 2},

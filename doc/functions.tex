@@ -1,5 +1,7 @@
 This section describes built-in functions for the TBASIC.
 
+Note that trigonometric functions assumes \emph{degree} as its input; 360.0 is full circle.
+
 \section{Synopsis}
 
 \subsection{ABORT} --- halts current program
@@ -13,7 +15,7 @@ This section describes built-in functions for the TBASIC.
 \subsection{CHR} \emph{ASCII-code} --- returns character for the code
 \subsection{CLR} --- deletes all variables declared
 \subsection{CLS} --- clears screen buffer (if supported)
-\subsection{COS} \emph{number} --- returns trigonometric cosine for the number
+\subsection{COS} \emph{degree} --- returns trigonometric cosine for the number
 \subsection{DEF FN} \emph{name}, \emph{code} --- defines new function
 \subsection{DIM} \emph{name}, \emph{(d1[, d2[, d3\ldots]])} --- defines new array with given dimensions
 \subsection{END} --- successfully exits program
@@ -47,11 +49,11 @@ This section describes built-in functions for the TBASIC.
 \subsection{SAVE} \emph{path} --- saves the command that have entered to the file (shell function)
 \subsection{SCROLL} \emph{amount} --- scrolls the terminal by given amount
 \subsection{SGN} \emph{number} --- returns sign of the number; $ -1.0 $ for $ n < 0 $, $ 1.0 $ for $ n > 0 $, $ 0.0 $ otherwise.
-\subsection{SIN} \emph{number} --- returns trigonometric sine for the number
+\subsection{SIN} \emph{degree} --- returns trigonometric sine for the number
 \subsection{SQRT} \emph{number} --- returns square root of the number
 \subsection{STR} \emph{number} --- returns string representation of the numerical value
 \subsection{TAB} \emph{amount} --- same as HTAB
-\subsection{TAN} \emph{number} --- returns trigonometric tangent for the number
+\subsection{TAN} \emph{degree} --- returns trigonometric tangent for the number
 \subsection{TEXTCOL} \emph{number} --- sets text colour of the terminal (if applicable)
 \subsection{TEMIT} \emph{frequency}, \emph{length} --- emits tone of given frequency for given length (in seconds) (does not work with CC)
 \subsection{VAL} \emph{string} --- returns numerical representation of the string
