@@ -305,7 +305,12 @@ _G._TBASIC.__checknumber = __checknumber
 _G._TBASIC.__checkstring = __checkstring
 
 
+--[[
+Function implementations
 
+ Cautions:
+* Every function that returns STRING must prepend "~"
+ ]]
 
 
 local function _fnprint(...)
@@ -482,7 +487,7 @@ local function _fnceil(n)
 end
 
 local function _fnchar(code)
-	return string.char(__checknumber(code))
+	return "~"..string.char(__checknumber(code)) -- about "~".. ? read the cautions above!
 end
 
 local function _fnfloor(n)
@@ -503,7 +508,15 @@ local function _fnmultinv(n) -- multiplicative invert
 end
 
 local function _fnsubstrleft(str, n)
-	return __checkstring(str):sub(1, __checknumber(n))
+	return "~"..__checkstring(str):sub(1, __checknumber(n))
+end
+
+local function _fnsubstr(str, left, right)
+	return "~"..__checkstring(str):sub(__checknumber(left), __checknumber(right))
+end
+
+local function _fnsubstrright(str, n)
+	return "~"..__checkstring(str):sub(-__checknumber(n))
 end
 
 local function _fnlen(str)
@@ -529,10 +542,6 @@ local function _fnmax(...)
 	return max
 end
 
-local function _fnsubstr(str, left, right)
-	return __checkstring(str):sub(__checknumber(left), __checknumber(right))
-end
-
 local function _fnmin(...)
 	local args = {... }
 	if #args < 1 then
@@ -546,10 +555,6 @@ local function _fnmin(...)
 		if min > n then min = n end
 	end
 	return min
-end
-
-local function _fnsubstrright(str, n)
-	return __checkstring(str):sub(-__checknumber(n))
 end
 
 local function _fnrand()
@@ -570,7 +575,13 @@ local function _fnsqrt(n)
 end
 
 local function _fntostring(n)
-	return tostring(__checknumber(n))
+	local ret = tostring(__checknumber(n))
+    if not ret then
+        _TBASIC._ERROR.ILLEGARARG()
+        return
+    else
+        return "~"..ret
+    end
 end
 
 local function _fntonumber(s)

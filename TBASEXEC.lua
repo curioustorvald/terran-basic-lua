@@ -490,9 +490,7 @@ end
 
 _TBASIC.SHOWLUAERROR = false
 
-local testprogram = [[
-10 PRINT( (1<2), "ET", (1>2) )
-]]
+local testprogram = nil
 
 
 _G._TBASIC.EXEC = function(cmdstring) -- you can access this interpreter with this global function
