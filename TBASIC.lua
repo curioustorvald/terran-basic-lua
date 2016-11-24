@@ -17,7 +17,7 @@ end
 
 args = {...}
 
-print(_G._TBASIC._VERSION)
+print(_G._TBASIC._HEADER)
 _TBASIC.PROMPT()
 _TBASIC.SHOWLUAERROR = false
 

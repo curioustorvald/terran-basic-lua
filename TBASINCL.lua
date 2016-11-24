@@ -46,7 +46,8 @@ end
 
 _G._TBASIC = {}
 _G._TBASIC._VERNUM = 0x0004 -- 0.4
-_G._TBASIC._VERSION = string.format("    **** TERRAN BASIC V%d.%d ****    ", bit.rshift(_TBASIC._VERNUM, 8), bit.band(_TBASIC._VERNUM, 0xFF))
+_G._TBASIC._VERSION = tonumber(string.format("%d.%d", bit.rshift(_TBASIC._VERNUM, 8), bit.band(_TBASIC._VERNUM, 0xFF)))
+_G._TBASIC._HEADER = string.format("    **** TERRAN BASIC V%d.%d ****    ", bit.rshift(_TBASIC._VERNUM, 8), bit.band(_TBASIC._VERNUM, 0xFF))
 _G._TBASIC.PROMPT = function() print("\nREADY.") end
 _G._TBASIC._INVOKEERR = function(msg, msg1)
 	if msg1 then
@@ -228,7 +229,8 @@ _G._TBASIC._INTPRTR.RESET = function()
 		M_ROOT2 = 1.414213562373,
 		TRUE = true,
 		FALSE = false,
-		NIL = nil
+		NIL = nil,
+        _VERSION = _TBASIC._VERSION
 	}
 	_G._TBASIC._INTPRTR.GOTOCNTR = 0
 	_G._TBASIC._INTPRTR.GOTOLMIT = 16384
