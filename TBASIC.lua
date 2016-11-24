@@ -58,14 +58,14 @@ else
 		elseif line:upper() == "EXIT" then
 			terminate_app = true
 			break
-		elseif line:match("[0-9]+ ") then
+		elseif line:sub(1,5):match("[0-9]+[ ]?") then -- enter new command
 			table.insert(lines, line)
 			lineno = lineno + 1
 			__read = true
 		elseif #line == 0 and line:byte(1) ~= 10 and line:byte(1) ~= 13 then
 			__read = true
 		else
-			_TBASIC.EXEC("1 "..line)
+			_TBASIC.EXEC("1 "..line) -- execute command right away
 		end
 
 		-- reset
