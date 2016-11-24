@@ -527,11 +527,11 @@ end
 
 local function _fntonumber(s)
 	if tonumber(s) then return s end
-	return tonumber(__checkstring((s))
+	return tonumber(__checkstring(s))
 end
 
 local function _fntan(n)
-	return math.tan(__checknumber(n)) end
+	return math.tan(__checknumber(n))
 end
 
 
@@ -795,7 +795,7 @@ _G._TBASIC.LUAFN = {
 	LOG     = {_fnloge, 1},
 	MAX     = {_fnmax, vararg},
 	MIN     = {_fnmin, vararg},
-	RND     = {_fnrand, 1},
+	RND     = {_fnrand, 0},
 	ROUND   = {_fnround, 1},
 	SGN     = {_fnsign, 1},
 	SIN     = {_fnsin, 1},

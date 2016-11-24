@@ -53,7 +53,7 @@ local function appendcommand(lineno, statement)
 end
 
 do -- Avoid heap allocs for performance
-	local tokens = {" ", "\t"} -- initial obvious tokens
+	local tokens = {" ", "\t", ",", "(", ")"} -- initial obvious tokens
 	local longest_token_len = 0
 	-- build 'tokens' table from list of operators from the language
 	for _, v in ipairs(_TBASIC._OPERATR) do
