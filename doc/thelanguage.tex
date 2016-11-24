@@ -34,6 +34,7 @@ DEF\par
 DIM\par
 DO\par
 END\par
+FALSE\par
 FLOOR\par
 FN\par
 FOR\par
@@ -51,12 +52,17 @@ LEN\par
 LIST\par
 LOAD\par
 LOG\par
+M\_E\par
+M\_PI\par
+M\_2PI\par
+M\_ROOT2\par
 MAX\par
 MID\par
 MIN\par
 MINUS\par %operator
 NEW\par
 NEXT\par
+NIL\par
 NOT\par %operator
 OR\par %operator
 PRINT\par
@@ -80,6 +86,7 @@ TEXTCOL\par
 THEN\par
 TO\par %operator
 TEMIT\par
+TRUE\par
 VAL\par
 VTAB\par
 XOR\par %operator
@@ -121,4 +128,22 @@ $-$\par
 )\par
 ,\par
 %}
-\end {multicols}
+\end{multicols}
+
+
+\section{Constants}
+
+TBASIC predefines some constants using its variable system. You can read from these variables, but any new assignment will have no effects and TBASIC will \emph{not} raise any errors.
+
+\begin{tabularx}{\textwidth}{l X}
+	\textbf{Name} & \textbf{Value}
+	\\
+	\endhead
+	M\_PI    & 3.141592653589 \\
+	M\_2PI   & 6.283185307180 \\
+	M\_E     & 2.718281828459 \\
+	M\_ROOT2 & 1.414213562373 \\
+	TRUE    & \emph{true} \\
+	FALSE   & \emph{false} \\
+	NIL     & \emph{nil} \\
+\end{tabularx}
