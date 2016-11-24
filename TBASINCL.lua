@@ -240,24 +240,28 @@ end
 local function __assert(arg, expected)
 	if type(arg) ~= expected then
 		_TBASIC._ERROR.ILLEGALARG(expected, type(arg))
+        return
 	end
 end
 
 local function __assertlhand(lval, expected)
 	if type(lval) ~= expected then
 		_TBASIC._ERROR.ILLEGALARG("LHAND: "..expected, type(lval))
+        return
 	end
 end
 
 local function __assertrhand(rval, expected)
 	if type(rval) ~= expected then
 		_TBASIC._ERROR.ILLEGALARG("RHAND: "..expected, type(rval))
+        return
 	end
 end
 
 local function __checknumber(arg)
 	if arg == nil then
 		_TBASIC._ERROR.ILLEGALARG("number", type(arg))
+        return
 	else
 		if type(arg) == "table" then
 			repeat
@@ -267,14 +271,19 @@ local function __checknumber(arg)
 		end
 
 		n = tonumber(arg)
-		if n == nil then _TBASIC._ERROR.ILLEGALARG("number", type(arg))
-		else return n end
+		if n == nil then
+            _TBASIC._ERROR.ILLEGALARG("number", type(arg))
+            return
+		else
+            return n
+        end
 	end
 end
 
 local function __checkstring(arg)
 	if type(arg) == "function" then
 		_TBASIC._ERROR.ILLEGALARG("STRING/NUMBER/BOOL", type(arg))
+        return
 	end
 
 	if type(arg) == "table" then
@@ -364,6 +373,7 @@ local function _fnif(bool)
 
 	if bool == nil then
 		_TBASIC._ERROR.ILLEGALARG()
+        return
 	end
 
 	if not bool then
@@ -385,6 +395,7 @@ end
 local function _fnnext(...)
 	if #_TBASIC._INTPRTR.CALLSTCK == 0 then -- nowhere to return
 		_TBASIC._ERROR.NEXTWOFOR()
+        return
 	end
 
 	local variables = {...} -- array of strings(varname) e.g. "$X, $Y, $Z"
@@ -397,6 +408,7 @@ local function _fnnext(...)
 			
 			if type(t) ~= "table" then
 				_TBASIC._ERROR.ILLEGALARG("ARRAY", type(t))
+                return
 			end
 
 			table.remove(t, 1)
@@ -408,6 +420,7 @@ local function _fnnext(...)
 			end
 		else
 			_TBASIC._ERROR.ILLEGALARG("ARRAY", type(t))
+            return
 		end
 	end
 
@@ -558,8 +571,8 @@ local function booleanise(bool)
 end
 
 local function _opconcat(lval, rval)
-	if type(lval) == "function" then _TBASIC._ERROR.ILLEGALARG("VALUE", "FUNCTION") end
-	if type(rval) == "function" then _TBASIC._ERROR.ILLEGALARG("VALUE", "FUNCTION") end
+	if type(lval) == "function" then _TBASIC._ERROR.ILLEGALARG("VALUE", "FUNCTION") return end
+	if type(rval) == "function" then _TBASIC._ERROR.ILLEGALARG("VALUE", "FUNCTION") return end
 
 	local l = (type(lval) == "string" and lval:byte(1)) == 126 and lval:sub(2, #lval) or __checkstring(lval)
 	local r = (type(rval) == "string" and rval:byte(1)) == 126 and rval:sub(2, #rval) or __checkstring(rval)
@@ -590,8 +603,10 @@ local function _opdiv(lval, rval)
 
 	if l == 0 and r == 0 then
 		_TBASIC._ERROR.INDETERMINANT()
+        return
 	elseif r == 0 then
 		_TBASIC._ERROR.DIV0()
+        return
 	else
 		return _optimes(l, 1.0 / r)
 	end
@@ -616,6 +631,7 @@ end
 local function _opassign(var, value)
 	if _TBASIC.isnumber(var) or _TBASIC.isfunction(var) or _TBASIC.isoperator(var) or _TBASIC.isargsep(var) then
 		_TBASIC._ERROR.ILLEGALNAME(var)
+        return
 	end
 
 	-- remove missed "$"
@@ -624,6 +640,7 @@ local function _opassign(var, value)
 	-- if it still has "$", the programmer just broke the law
 	if varname:byte(1) == 36 then
 		_TBASIC._ERROR.ILLEGALNAME(varname, "HAS ILLEGAL CHARACTER '$'")
+        return
 	end
 
 	_TBASIC._INTPRTR.VARTABLE[varname:upper()] = value
@@ -725,6 +742,7 @@ local function _opsizeof(target)
 		return #target
 	else
 		_TBASIC._ERROR.ILLEGALARG("string or array", type(lval))
+        return
 	end
 end
 
@@ -763,7 +781,7 @@ local function _opintrangestep(seq, stp) -- i know you can just use "for i = fro
 	__assert(seq, "table")
 
 	if step == 1 then return seq end
-	if step < 1 then _TBASIC._ERROR.ILLEGALARG() end
+	if step < 1 then _TBASIC._ERROR.ILLEGALARG() return end
 
 	local newseq = {}
 	for i, v in ipairs(seq) do
