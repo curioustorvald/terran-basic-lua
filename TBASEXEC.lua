@@ -248,6 +248,7 @@ do -- Avoid heap allocs for performance
 
 	local isvariable = _TBASIC.isvariable
 	local isnumber = _TBASIC.isnumber
+	local isstring = _TBASIC.isstring
 
 	local function isuserfunc(word)
 		if type(word) == "table" then return false end
@@ -335,7 +336,7 @@ do -- Avoid heap allocs for performance
 	end
 
 	function printdbg(...)
-		local debug = true--false
+		local debug = false
 		if debug then print("DBG", ...) end
 	end
 
@@ -402,7 +403,8 @@ do -- Avoid heap allocs for performance
 								local reversedargs = {}
 
 								while #execstack > 0 and
-										(isvariable(stackpeek(execstack)) or isnumber(stackpeek(execstack)))
+										(isvariable(stackpeek(execstack)) or isnumber(stackpeek(execstack)) or
+												isstring(stackpeek(execstack)))
 								do
 									stackpush(reversedargs, stackpop(execstack))
 								end
@@ -489,8 +491,7 @@ end
 _TBASIC.SHOWLUAERROR = false
 
 local testprogram = [[
-10 PRINT(MAX(1,7,682,3,6,-45))
-20 PRINT(MIN(1,7,682,3,6,-45))
+10 PRINT( (1<2), "ET", (1>2) )
 ]]
 
 

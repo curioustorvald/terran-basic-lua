@@ -146,6 +146,7 @@ _G._TBASIC._FNCTION = {
 	"CBRT", -- cubic root
 	"MAX", "MIN",
 	"INV", -- returns (1.0 / arg)
+    "RAD", -- converts deg into rad
 	-- string manipulation
 	"LEN",
 	"LEFT", -- just like in Excel
@@ -221,10 +222,10 @@ _G._TBASIC._INTPRTR.RESET = function()
 	_G._TBASIC._INTPRTR.CALLSTCK = {}
 	_G._TBASIC._INTPRTR.STACKMAX = 200
 	_G._TBASIC._INTPRTR.CNSTANTS = {
-		M_PI    = 3.14159265359,
-		M_2PI   = 6.28318530718,
-		M_E     = 2.71828182846,
-		M_ROOT2 = 1.41421356237,
+		M_PI    = 3.141592653589,
+		M_2PI   = 6.283185307180,
+		M_E     = 2.718281828459,
+		M_ROOT2 = 1.414213562373,
 		TRUE = true,
 		FALSE = false,
 		NIL = nil
@@ -307,24 +308,40 @@ _G._TBASIC.__checkstring = __checkstring
 
 
 
-local function _fnprint(arg)
-	if type(arg) == "function" then
-		_TBASIC._ERROR.SYNTAX()
-		return
-	end
+local function _fnprint(...)
+	function printarg(arg)
+        if type(arg) == "function" then
+            _TBASIC._ERROR.SYNTAX()
+            return
+        end
 
-	if type(arg) == "boolean" then
-		if arg then print(" TRUE")
-		else print(" FALSE") end
-	elseif _TBASIC.isstring(arg) then
-		print(__checkstring(arg))
-	elseif _TBASIC.isnumber(arg) then -- if argument can be turned into a number (e.g. 14321, "541")
-		print(" "..arg)
-	elseif type(arg) == "table" then
-		_fnprint(arg[1]) -- recursion
-	else
-		print(tostring(arg))
-	end
+        if type(arg) == "boolean" then
+            if arg then io.write(" TRUE")
+            else io.write(" FALSE") end
+        elseif _TBASIC.isstring(arg) then
+            io.write(__checkstring(arg))
+        elseif _TBASIC.isnumber(arg) then -- if argument can be turned into a number (e.g. 14321, "541")
+            io.write(" "..arg)
+        elseif type(arg) == "table" then
+            printarg(arg[1]) -- recursion
+        else
+            io.write(tostring(arg))
+        end
+    end
+
+    local args = {...}
+
+    if #args < 1 then
+        io.write "\n"
+    else
+        for i, arg in ipairs(args) do
+            if i > 1 then io.write "\t" end
+
+            printarg(arg)
+        end
+    end
+
+    io.write "\n"
 end
 
 local function _fngoto(lnum)
@@ -437,15 +454,19 @@ local function _fnabs(n)
 end
 
 local function _fnsin(n)
-	return math.sin(math.deg(__checknumber(n)))
+	return math.sin(__checknumber(n))
 end
 
 local function _fncos(n)
-	return math.cos(math.deg(__checknumber(n)))
+	return math.cos(__checknumber(n))
 end
 
 local function _fntan(n)
-	return math.tan(math.deg(__checknumber(n)))
+	return math.tan(__checknumber(n))
+end
+
+local function _fntorad(n)
+    return math.rad(__checknumber(n))
 end
 
 local function _fnascii(char)
@@ -486,7 +507,7 @@ local function _fnsubstrleft(str, n)
 end
 
 local function _fnlen(str)
-	return #str
+	return #__checkstring(str)
 end
 
 local function _fnloge(n)
@@ -528,7 +549,7 @@ local function _fnmin(...)
 end
 
 local function _fnsubstrright(str, n)
-	return __checkstring(str):sub(1, -__checknumber(n))
+	return __checkstring(str):sub(-__checknumber(n))
 end
 
 local function _fnrand()
@@ -545,7 +566,7 @@ local function _fnsign(n)
 end
 
 local function _fnsqrt(n)
-	return __checknumber(n)^2
+	return __checknumber(n)^(0.5)
 end
 
 local function _fntostring(n)
@@ -815,7 +836,7 @@ _G._TBASIC.LUAFN = {
 	FOR     = {_fnfor, 1},
 	NEXT    = {_fnnext, vararg},
 	-- stdio
-	PRINT   = {_fnprint, 1},
+	PRINT   = {_fnprint, vararg},
 	-- mathematics
 	ABS     = {_fnabs, 1},
 	CBRT    = {_fncbrt, 1},
@@ -827,6 +848,7 @@ _G._TBASIC.LUAFN = {
 	LOG     = {_fnloge, 1},
 	MAX     = {_fnmax, vararg},
 	MIN     = {_fnmin, vararg},
+    RAD     = {_fntorad, 1},
 	RND     = {_fnrand, 0},
 	ROUND   = {_fnround, 1},
 	SGN     = {_fnsign, 1},
