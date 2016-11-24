@@ -481,9 +481,16 @@ local function _fnloge(n)
 end
 
 local function _fnmax(...)
-	local max = -math.huge
-	for _, n in ipairs({...}) do
-		if max < n then max = n end
+	local args = {... }
+	if #args < 1 then
+        _TBASIC._ERROR.ILLEGALARG()
+        return
+    end
+
+    local max = -math.huge
+	for _, i in ipairs(args) do
+		local n = __checknumber(i)
+        if max < n then max = n end
 	end
 	return max
 end
@@ -493,9 +500,16 @@ local function _fnsubstr(str, left, right)
 end
 
 local function _fnmin(...)
-	local min = math.huge
-	for _, n in ipairs({...}) do
-		if min > n then max = n end
+	local args = {... }
+	if #args < 1 then
+        _TBASIC._ERROR.ILLEGALARG()
+        return
+    end
+
+    local min = math.huge
+	for _, i in ipairs(args) do
+        local n = __checknumber(i)
+		if min > n then min = n end
 	end
 	return min
 end

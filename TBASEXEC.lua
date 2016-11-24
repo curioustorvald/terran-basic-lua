@@ -247,6 +247,7 @@ do -- Avoid heap allocs for performance
 	end
 
 	local isvariable = _TBASIC.isvariable
+	local isnumber = _TBASIC.isnumber
 
 	local function isuserfunc(word)
 		if type(word) == "table" then return false end
@@ -325,7 +326,7 @@ do -- Avoid heap allocs for performance
 				end
 			end
 
-			printdbg("--> execword outarg", table.unpack(args))
+			printdbg("--> execword-outarg", table.unpack(args))
 			result = _TBASIC.LUAFN[word][1](table.unpack(args))
 
 			printdbg("--> result", result)
@@ -334,7 +335,7 @@ do -- Avoid heap allocs for performance
 	end
 
 	function printdbg(...)
-		local debug = false
+		local debug = true--false
 		if debug then print("DBG", ...) end
 	end
 
@@ -399,7 +400,10 @@ do -- Avoid heap allocs for performance
 							else
 								-- consume entire stack
 								local reversedargs = {}
-								while #execstack > 0 and isvariable(stackpeek(execstack)) do
+
+								while #execstack > 0 and
+										(isvariable(stackpeek(execstack)) or isnumber(stackpeek(execstack)))
+								do
 									stackpush(reversedargs, stackpop(execstack))
 								end
 								-- reverse 'args'
@@ -407,7 +411,9 @@ do -- Avoid heap allocs for performance
 									stackpush(args, stackpop(reversedargs))
 								end
 							end
+
 							local terminate_loop = execword(funcname, args)
+
 							if terminate_loop then
 								printdbg("--> termination of loop")
 								printdbg("--------")
@@ -482,7 +488,10 @@ end
 
 _TBASIC.SHOWLUAERROR = false
 
-local testprogram = nil
+local testprogram = [[
+10 PRINT(MAX(1,7,682,3,6,-45))
+20 PRINT(MIN(1,7,682,3,6,-45))
+]]
 
 
 _G._TBASIC.EXEC = function(cmdstring) -- you can access this interpreter with this global function
