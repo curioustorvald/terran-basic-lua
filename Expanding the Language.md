@@ -36,7 +36,7 @@ Much the same as adding *word*s, but there's some different parts. You will add 
 
 ## Just tell me how to do that!
 
-Let's say you want to add a word ``````UPGOER``````. What it does is it takes a number, and say *Up-goer ```number``` goes up!* If you say ```UPGOER 5```, the computer will say ```Up-goer 5 goes up!```
+Let's say you want to add a word ``````UPGOER``````. What it does is it takes a number, and say *Up-goer ```number``` goes up!* If you tell computer ```UPGOER 5```, the computer will reply ```Up-goer 5 goes up!```
 
 Here's how it's done:
 
@@ -50,14 +50,14 @@ Here's how it's done:
    at the bottom.
         
 2. Add ```"UPGOER"``` to ```_TBASIC._FNCTION``` (enter this: ```table.insert(_TBASIC._FNCTION, "UPGOER")``` to the next line)
-3. Add  ```{_fnupgoer, 1}``` to ```_TBASIC.LUAFN```. Number ```1``` says it will take that number of things to do something. (enter this: ```_TBASIC.LUAFN.UPGOER = {_fnupgoer, 1}``` to the next line)
+3. Add  ```{_fnupgoer, 1}``` to ```_TBASIC.LUAFN```. Number ```1``` means that it will take that number of things to do something. (enter this: ```_TBASIC.LUAFN.UPGOER = {_fnupgoer, 1}``` to the next line)
 4. Done!
 
 
 ## Tell me more!
 
-* ```__checknumber(number)``` gives you real number ```number``` if it can be written as a number. If not, computer will stop and say it didn't get a number.
+* ```__checknumber(number)``` returns real number ```number``` if it can be written as a number. If not, computer will stop and say it didn't get a number.
 
-* ```__checkstring(letters)``` gives you letters ```letters``` if it can be written as letters.
+* ```__checkstring(letters)``` returns letters ```letters``` if it can be written as letters.
 
 * ```__assert(thing, type)``` will check the type of ```thing``` is a ```type```. If it is, computer will move on. If not, it will stop and say something.
