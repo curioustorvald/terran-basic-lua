@@ -223,10 +223,10 @@ _G._TBASIC._INTPRTR.RESET = function()
 	_G._TBASIC._INTPRTR.CALLSTCK = {}
 	_G._TBASIC._INTPRTR.STACKMAX = 200
 	_G._TBASIC._INTPRTR.CNSTANTS = {
-		M_PI    = 3.141592653589,
-		M_2PI   = 6.283185307180,
-		M_E     = 2.718281828459,
-		M_ROOT2 = 1.414213562373,
+		M_PI    = 3.1415926535898, -- this is a standard implementation
+		M_2PI   = 6.2831853071796, -- this is a standard implementation
+		M_E     = 2.7182818284591, -- this is a standard implementation
+		M_ROOT2 = 1.4142135623731, -- this is a standard implementation
 		TRUE = true,
 		FALSE = false,
 		NIL = nil,
@@ -339,7 +339,7 @@ local function _fnprint(...)
     local args = {...}
 
     if #args < 1 then
-        io.write "\n"
+        io.write ""
     else
         for i, arg in ipairs(args) do
             if i > 1 then io.write "\t" end
@@ -611,8 +611,7 @@ local function _opconcat(lval, rval)
 	local l = (type(lval) == "string" and lval:byte(1)) == 126 and lval:sub(2, #lval) or __checkstring(lval)
 	local r = (type(rval) == "string" and rval:byte(1)) == 126 and rval:sub(2, #rval) or __checkstring(rval)
 
-	ret = l..r
-	return ret:byte(1) == 126 and "~"..ret or ret -- re-append missing "~" if applicable
+	return "~"..l..r
 end
 
 local function _opplus(lval, rval)
@@ -680,8 +679,18 @@ local function _opassign(var, value)
 	_TBASIC._INTPRTR.VARTABLE[varname:upper()] = value
 end
 
-local function _opeq(lval, rval) return booleanise(__checkstring(lval) == __checkstring(rval)) end
-local function _opne(lval, rval) return booleanise(__checkstring(lval) ~= __checkstring(rval)) end
+local function _opeq(lval, rval)
+    if tonumber(lval) and tonumber(rval) then
+        return booleanise(tonumber(lval) == tonumber(rval))
+    else
+        return booleanise(__checkstring(lval) == __checkstring(rval))
+    end
+end
+
+local function _opne(lval, rval)
+    return booleanise(not _opeq(lval, rval))
+end
+
 local function _opgt(lval, rval) 
 	local expected = "number"
 	local l = __checknumber(lval)
@@ -889,12 +898,12 @@ _G._TBASIC.LUAFN = {
 	["%"]   = {_opmodulo, 2},
 	["^"]   = {_oppower, 2},
 	["=="]  = {_opeq, 2},
-	["!="]  = {_opne, 2}, {["<>"] = _opne, 2}, {["><"] = _opne, 2},
-	[">="]  = {_opge, 2}, {["=>"] = _opge, 2},
-	["<="]  = {_ople, 2}, {["=<"] = _ople, 2},
+	["!="]  = {_opne, 2}, ["<>"] = {_opne, 2}, ["><"] = {_opne, 2},
+	[">="]  = {_opge, 2}, ["=>"] = {_opge, 2},
+	["<="]  = {_ople, 2}, ["=<"] = {_ople, 2},
 	[">"]   = {_opgt, 2},
 	["<"]   = {_oplt, 2},
-	["="]   = {_opassign, 2}, {[":="] = _opassign, 2},
+	["="]   = {_opassign, 2}, [":="] = {_opassign, 2},
 	SIZEOF  = {_opsizeof, 1},
 	MINUS   = {_opunaryminus, 1},
 	-- logical operators
