@@ -54,12 +54,7 @@ The interpreter is basically a stack-based machine, much like [FORTH](https://en
 
 ## Disclaimer
 
-This project is in its early stages, meaning most of the keywords are not implemented.
-
-As of version 0.4, currently implemented keywords are:
-
-* All of the operators
-* CLR  PRINT  REM  IF  THEN  GOTO  GOSUB  RETURN  END  ABORT  ABORTM  NEW  LIST  RUN  FOR  NEXT
+This project is in its early stages, meaning most of the keywords are not implemented, already implemented features _are_ buggy.
 
 Reference manual is work-in-progress.
 
