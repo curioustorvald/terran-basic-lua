@@ -22,6 +22,18 @@ _TBASIC.PROMPT()
 _TBASIC.SHOWLUAERROR = false
 
 
+local function concat_lines(lines)
+    local out = ""
+    for i = 1, _TBASIC._INTPRTR.MAXLINES do
+        if lines[i] ~= nil then
+            out = out.."\n"..tostring(i).." "..lines[i]
+        end
+    end
+
+    return out
+end
+
+
 if args[1] then
 	local prog = nil
 	if fs and fs.open then -- ComputerCraft
@@ -40,28 +52,41 @@ else
 
 
 	local lines = {}
-	local lineno = 1
+
 	while not terminate_app do
 		local __read = false
 		line = io.read()
 
 		if line:upper() == "NEW" then
 			lines = {}
-			lineno = 1
 		elseif line:upper() == "RUN" then
-			_TBASIC.EXEC(table.concat(lines, "\n"))
+            _TBASIC.EXEC(concat_lines(lines))
 		elseif line:upper() == "LIST" then
 			print()
-			print(table.concat(lines, "\n"))
+			print(concat_lines(lines))
 			_TBASIC.PROMPT()
 			__read = true
 		elseif line:upper() == "EXIT" then
 			terminate_app = true
 			break
-		elseif line:sub(1,5):match("[0-9]+[ ]?") then -- enter new command
-			table.insert(lines, line)
-			lineno = lineno + 1
+		elseif line:sub(1,6):match("[0-9]+ ") then -- enter new command (this limits max linumber to be 99999)
+			local lineno = line:sub(1,6):match("[0-9]+ ", 1)
+            local statement = line:sub(#lineno + 1)
+            lines[tonumber(lineno)] = statement
 			__read = true
+        elseif line:upper() == "RENUM" then
+            local statement_table = {}
+            -- first, get the list of commands, without line number indexing
+            for i = 1, _TBASIC._INTPRTR.MAXLINES do
+                if lines[i] ~= nil then
+                    table.insert(statement_table, lines[i])
+                end
+            end
+            -- re-index using statement_table
+            lines = {}
+            for i = 1, #statement_table do
+                lines[i * 10] = statement_table[i]
+            end
 		elseif #line == 0 and line:byte(1) ~= 10 and line:byte(1) ~= 13 then
 			__read = true
 		else

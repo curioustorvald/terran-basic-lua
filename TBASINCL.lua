@@ -167,7 +167,10 @@ _G._TBASIC._FNCTION = {
 	-- commands
 	"RUN", -- run a program or a line. Synopsis: "RUN", "RUN [line]" (this is a Shell function)
 	"LIST", -- list currently entered program. Synopsis: "LIST", "LIST [line]", "LIST [from "-" to]" (this is a Shell function)
-	-- external IO
+	"NEW", -- clear program lines buffer (this is a Shell function)
+    "RENUM", -- re-number BASIC statements (this is a Shell function)
+    "DELETE", -- delete line (this is a Shell function)
+    -- external IO
 	"LOAD", -- file load. Synopsis: "LOAD [filename]"
 	"SAVE", -- file save. Synopsis: "SAVE [filename]"
 }
