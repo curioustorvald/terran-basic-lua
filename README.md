@@ -44,7 +44,7 @@ You clone it, make it great, and make a pull request.
 You can also help improving the documentation by adding missing texts, correcting my bad English (if any), or making a translation for non-English speaker like me. Don't know how to use TeX? Just leave them as plain text/MS Word/Rich Text Format and I'll take care of them. (Note: HWP is not to be accepted. C'mon, what the f--k is HWP?)
 
 ### In general
-If you have suggestions/bugs, feel free to report them to Issue Tracker.
+If you have suggestions/bugs, feel free to report them on the Issue Tracker.
 
 
 ## How it works

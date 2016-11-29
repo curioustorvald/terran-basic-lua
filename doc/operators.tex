@@ -38,9 +38,11 @@ Because of the way the language is desingned\footnote{don't write like \monobf{1
 	\textbf{Code} & \textbf{Evaluation} & \textbf{Remarks}
 	\\
 	\endhead
-	\mono{FOO - 1} & subtraction(FOO, 1) & Works normally
+	\mono{FOO - 1} & subtraction(FOO, 1) & Variable FOO subtracted by 1
 	\\
-	\mono{FOO-1} & FOOMINUS1 & Syntax error
+    \mono{FOO -1} & FOO(MINUS 1) & Function FOO() with argument -1
+    \\
+    \mono{FOO-1} & FOOMINUS1 & Syntax error
 \end{tabularx}
 
 
@@ -56,7 +58,7 @@ Because of the way the language is desingned\footnote{don't write like \monobf{1
 
 \section{Logical Operators}
 
-\subsection{AND} \emph{condition 1} AND \emph{condition 2} --- returns \textbf{TRUE} if both conditions (boolean value) are true; false otherwise
+\subsection{AND} \emph{condition 1} AND \emph{condition 2} --- returns \textbf{TRUE} if both conditions (boolean value) are true; \textbf{FALSE} otherwise
 \subsection{OR} \emph{condition 1} OR \emph{condition 2} --- returns \textbf{TRUE} if one or more conditions (boolean value) are true; \textbf{FALSE} if both conditions are false
 \subsection{NOT} NOT \emph{condition} --- negates condition (boolean value)
 
