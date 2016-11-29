@@ -121,7 +121,7 @@ _G._TBASIC._FNCTION = {
 	-- flow control
 	"GO", "GOTO", -- considered harmful
 	"GOSUB", "RETURN",
-	"FOR", "NEXT",
+	"FOR", "NEXT", "IN",
 	"DO", -- reserved only
 	"IF", "THEN",
     --"ELSE", "ELSEIF", -- reserved only, will not be implemented
