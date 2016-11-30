@@ -22,9 +22,9 @@ _TBASIC.PROMPT()
 _TBASIC.SHOWLUAERROR = false
 
 
-local function concat_lines(lines)
+local function concat_lines(lines, startindex, endindex)
     local out = ""
-    for i = 1, _TBASIC._INTPRTR.MAXLINES do
+    for i = startindex or 1, endindex or _TBASIC._INTPRTR.MAXLINES do
         if lines[i] ~= nil then
             out = out.."\n"..tostring(i).." "..lines[i]
         end
@@ -57,16 +57,75 @@ else
 		local __read = false
 		line = io.read()
 
-		if line:upper() == "NEW" then
+        -- tokenise line by " "
+        args = {}
+        for word in line:gmatch("[^ ]+") do
+            table.insert(args, word:upper())
+        end
+
+
+        -- massive if-else for running command, cos implementing proper command executor is too expensive here
+		if args[1] == "NEW" then
 			lines = {}
-		elseif line:upper() == "RUN" then
+		elseif args[1] == "RUN" then
             _TBASIC.EXEC(concat_lines(lines))
-		elseif line:upper() == "LIST" then
-			print()
-			print(concat_lines(lines))
+		elseif args[1] == "LIST" then -- LIST, LIST 42, LIST 10-80
+            if not args[2] then
+                print(concat_lines(lines))
+            else
+                if args[2]:match("-") then -- ranged
+                    range = {}
+                    for n in args[2]:gmatch("[^-]+") do
+                        table.insert(range, n)
+                    end
+                    local rangestart = tonumber(range[1])
+                    local rangeend = tonumber(range[2])
+
+                    if not rangestart or not rangeend then
+                        _TBASIC._ERROR.ILLEGALARG()
+                    else
+                        print(concat_lines(lines, rangestart, rangeend))
+                    end
+                else
+                    local lineno = tonumber(args[2])
+                    if not lineno then
+                        _TBASIC._ERROR.ILLEGALARG()
+                    else
+                        print(concat_lines(lines, lineno, lineno))
+                    end
+                end
+            end
 			_TBASIC.PROMPT()
 			__read = true
-		elseif line:upper() == "EXIT" then
+        elseif args[1] == "DELETE" then -- DELETE 30, DELETE 454-650
+            if not args[2] then
+                _TBASIC._ERROR.ILLEGALARG()
+            else
+                if args[2]:match("-") then -- ranged
+                    range = {}
+                    for n in args[2]:gmatch("[^-]+") do
+                        table.insert(range, n)
+                    end
+                    local rangestart = tonumber(range[1])
+                    local rangeend = tonumber(range[2])
+
+                    if not rangestart or not rangeend then
+                        _TBASIC._ERROR.ILLEGALARG()
+                    else
+                        for i = rangestart, rangeend do
+                            lines[i] = nil
+                        end
+                    end
+                else
+                    local lineno = tonumber(args[2])
+                    if not lineno then
+                        _TBASIC._ERROR.ILLEGALARG()
+                    else
+                        lines[lineno] = nil
+                    end
+                end
+            end
+		elseif args[1] == "EXIT" then
 			terminate_app = true
 			break
 		elseif line:sub(1,6):match("[0-9]+ ") then -- enter new command (this limits max linumber to be 99999)
@@ -74,8 +133,8 @@ else
             local statement = line:sub(#lineno + 1)
             lines[tonumber(lineno)] = statement
 			__read = true
-        elseif line:upper() == "RENUM" then
-            local statement_table = {}
+        elseif args[1] == "RENUM" then
+            --[[local statement_table = {}
             -- first, get the list of commands, without line number indexing
             for i = 1, _TBASIC._INTPRTR.MAXLINES do
                 if lines[i] ~= nil then
@@ -86,7 +145,8 @@ else
             lines = {}
             for i = 1, #statement_table do
                 lines[i * 10] = statement_table[i]
-            end
+            end]]
+            print("DISABLED -- GOTO/GOSUB NOT FIXED", "BUG")
 		elseif #line == 0 and line:byte(1) ~= 10 and line:byte(1) ~= 13 then
 			__read = true
 		else
