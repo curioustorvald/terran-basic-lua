@@ -11,17 +11,17 @@
 80 END
 
 100 REM Plural beers
-101 PRINT beers;" bottles of beer on the wall, ";beers;" bottles of beer."
-102 PRINT "Take one down and pass it around, ";beers - 1;" bottles of beer on the wall."
+101 PRINT beers ; " bottles of beer on the wall, " ; beers ; " bottles of beer."
+102 PRINT "Take one down and pass it around, " ; beers - 1 ; " bottles of beer on the wall."
 103 RETURN
 
 200 REM Plu-Singular beers
-201 PRINT beers;" bottles of beer on the wall, ";beers;" bottles of beer."
-202 PRINT "Take one down and pass it around, ";beers - 1;" bottle of beer on the wall."
+201 PRINT beers ; " bottles of beer on the wall, " ; beers ; " bottles of beer."
+202 PRINT "Take one down and pass it around, " ; beers - 1 ; " bottle of beer on the wall."
 203 RETURN
 
 300 REM Singu-nil beers
-301 PRINT beers;" bottle of beer on the wall, ";beers;" bottle of beer."
+301 PRINT beers ; " bottle of beer on the wall, " ; beers ; " bottle of beer."
 302 PRINT "Take one down and pass it around, no more bottles of beer on the wall."
 303 RETURN
 

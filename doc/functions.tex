@@ -19,6 +19,7 @@ Note: trigonometric functions assumes \emph{radian} as its input; $2\pi$\ is a f
 \subsection{CLS} --- clears screen buffer (if supported)
 \subsection{COS} \emph{radian} --- returns trigonometric cosine for the number
 \subsection{DEF FN} \emph{name}, \emph{code} --- defines new function
+\subsection{DELETE} \emph{from[-to]} --- deletes specified line that have entered (single line or range of lines, shell function)
 \subsection{DIM} \emph{name}, \emph{(d1[, d2[, d3\ldots]])} --- defines new array with given dimensions
 \subsection{END} --- successfully exits program
 \subsection{FLOOR} \emph{number} --- returns round-down of the number
@@ -33,7 +34,7 @@ Note: trigonometric functions assumes \emph{radian} as its input; $2\pi$\ is a f
 \subsection{INV} \emph{number} --- returns (1.0 / number)
 \subsection{LEFT} \emph{string}, \emph{number} --- returns substring of leftmost \emph{number} characters
 \subsection{LEN} \emph{string} --- returns length of the string
-\subsection{LIST} \emph{[from[, to]]} --- prints out commands that have entered (shell function)
+\subsection{LIST} \emph{[from[-to]]} --- prints out commands that have entered (entire commands or single line or range of lines, shell function)
 \subsection{LOAD} \emph{path} --- loads the file as a command (shell function)
 \subsection{LOG} \emph{number} --- returns natural logarithm of the number
 \subsection{MAX} \emph{number, number[, \ldots]]} --- returns the biggest of the numbers
