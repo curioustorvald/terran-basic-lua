@@ -6,30 +6,30 @@ TBASIC: Simple BASIC language based on the Commodore BASIC Version 2.
 
 How to use in your program:
 
-	1. load the script by:
-		if you're using ComputerCraft, use:
-			os.loadAPI "TBASEXEC.lua"
-		else, use:
-			require "TBASEXEC"
+    1. load the script by:
+        if you're using ComputerCraft, use:
+            os.loadAPI "TBASEXEC.lua"
+        else, use:
+            require "TBASEXEC"
 
-	2. run:
-		_TBASIC.EXEC(string of whole command)
+    2. run:
+        _TBASIC.EXEC(string of whole command)
 ]]
 
 if os and os.loadAPI then -- ComputerCraft
-	os.loadAPI "TBASINCL.lua"
+    os.loadAPI "TBASINCL.lua"
 else
-	require "TBASINCL"
+    require "TBASINCL"
 end
 
 table.concat = function(t, delimeter)
-	if #t == 0 then return "" end
-	local outstr = t[1]
-	for i = 2, #t do
-		outstr = outstr..delimeter..tostring(t[i])
-	end
+    if #t == 0 then return "" end
+    local outstr = t[1]
+    for i = 2, #t do
+        outstr = outstr..delimeter..tostring(t[i])
+    end
 
-	return outstr
+    return outstr
 end
 
 
@@ -43,450 +43,450 @@ local programlist = {}
 -- LEXER ----------------------------------------------------------------------
 
 local function appendcommand(lineno, statement)
-	if lineno > _TBASIC._INTPRTR.MAXLINES then
-		_TBASIC._ERROR.LINETOOBIG()
-	elseif lineno < 0 then
-		_TBASIC._ERROR.NOLINENUM()
-	else
-		programlist[lineno] = statement
-	end
+    if lineno > _TBASIC._INTPRTR.MAXLINES then
+        _TBASIC._ERROR.LINETOOBIG()
+    elseif lineno < 0 then
+        _TBASIC._ERROR.NOLINENUM()
+    else
+        programlist[lineno] = statement
+    end
 end
 
 do -- Avoid heap allocs for performance
-	local tokens = {" ", "\t", ",", "(", ")"} -- initial obvious tokens
-	local longest_token_len = 0
-	-- build 'tokens' table from list of operators from the language
-	for _, v in ipairs(_TBASIC._OPERATR) do
-		if not v:match("[A-Za-z]") then -- we want non-alphabetic operators as a token
-			table.insert(tokens, v)
-			-- get longest_token_len, will be used for 'lookahead'
-			local tokenlen = #v
-			if longest_token_len < #v then
-				longest_token_len = #v
-			end
-		end
-	end
-	-- sort them out using ther hash for binary search
-	table.sort(tokens, function(a, b) return string.hash(a) < string.hash(b) end)
+    local tokens = {" ", "\t", ",", "(", ")"} -- initial obvious tokens
+    local longest_token_len = 0
+    -- build 'tokens' table from list of operators from the language
+    for _, v in ipairs(_TBASIC._OPERATR) do
+        if not v:match("[A-Za-z]") then -- we want non-alphabetic operators as a token
+            table.insert(tokens, v)
+            -- get longest_token_len, will be used for 'lookahead'
+            local tokenlen = #v
+            if longest_token_len < #v then
+                longest_token_len = #v
+            end
+        end
+    end
+    -- sort them out using ther hash for binary search
+    table.sort(tokens, function(a, b) return string.hash(a) < string.hash(b) end)
 
 
-	function parsewords(line)
-		if line == nil then return end
+    function parsewords(line)
+        if line == nil then return end
 
-		local has_if_statement = false
+        local has_if_statement = false
 
-		-----------------------
-		-- check line sanity --
-		-----------------------
+        -----------------------
+        -- check line sanity --
+        -----------------------
 
-		-- filter for IF statement
-		if line:sub(1, 2):match("[Ii][Ff]") then
-			has_if_statement = true
-			-- no matching THEN
-			if not line:match("[Tt][Hh][Ee][Nn]") then
-				_TBASIC._ERROR.NOMATCHING("IF", "THEN")
-			-- assignment on IF clause
-			elseif line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match("[^=]=[^=]") or
-				   line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match(":=") then
-				_TBASIC._ERROR.ASGONIF()
-			end
-		end
+        -- filter for IF statement
+        if line:sub(1, 2):match("[Ii][Ff]") then
+            has_if_statement = true
+            -- no matching THEN
+            if not line:match("[Tt][Hh][Ee][Nn]") then
+                _TBASIC._ERROR.NOMATCHING("IF", "THEN")
+            -- assignment on IF clause
+            elseif line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match("[^=]=[^=]") or
+                   line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match(":=") then
+                _TBASIC._ERROR.ASGONIF()
+            end
+        end
 
-		--------------------------------------------------
-		-- automatically infer and insert some commands --
-		--------------------------------------------------
-		-- (This is starting to get dirty...)
+        --------------------------------------------------
+        -- automatically infer and insert some commands --
+        --------------------------------------------------
+        -- (This is starting to get dirty...)
 
-		-- unary minus
-		local matchobj = line:find("%-[0-9]")
-		if matchobj then -- in this pattern, it always returns a number
-			local newline = line:sub(1, matchobj - 1) .. "MINUS " .. line:sub(matchobj + 1, #line)
-			line = newline
-		end
-		-- conditional for IF
-		-- if IF statement has no appended paren
-		if has_if_statement and not line:match("[Ii][Ff][ ]*%(") then
-			local newline = line:gsub("[Ii][Ff]", "IF ( "):gsub("[Tt][Hh][Ee][Nn]", " ) THEN")
-			line = newline
-		end
-		-- special treatment for FOR
-		if line:sub(1, 3):upper() == "FOR" then
-			if line:match("[0-9]?%.[0-9]") then -- real number used (e.g. "3.14", ".5")
-				_TBASIC._ERROR.ILLEGALARG()
-			else
-				local varnameintm = line:match(" [^\n]+[ =]")
+        -- unary minus
+        local matchobj = line:find("%-[0-9]")
+        if matchobj then -- in this pattern, it always returns a number
+            local newline = line:sub(1, matchobj - 1) .. "MINUS " .. line:sub(matchobj + 1, #line)
+            line = newline
+        end
+        -- conditional for IF
+        -- if IF statement has no appended paren
+        if has_if_statement and not line:match("[Ii][Ff][ ]*%(") then
+            local newline = line:gsub("[Ii][Ff]", "IF ( "):gsub("[Tt][Hh][Ee][Nn]", " ) THEN")
+            line = newline
+        end
+        -- special treatment for FOR
+        if line:sub(1, 3):upper() == "FOR" then
+            if line:match("[0-9]?%.[0-9]") then -- real number used (e.g. "3.14", ".5")
+                _TBASIC._ERROR.ILLEGALARG()
+            else
+                local varnameintm = line:match(" [^\n]+[ =]")
 
-				if varnameintm then
-					local varname = varnameintm:match("[^= ]+")
-					if varname then
-						local newline = line:gsub(" "..varname.."[ =]", " $"..varname.." "..varname.." = ")
-						line = newline:gsub("= =", "=")
-					else
-						_TBASIC._ERROR.SYNTAX()
-					end
-				end
-				-- basically, "FOR x x = 1 TO 10", which converts to "x x 1 10 TO = FOR",
-				-- which is executed (in RPN) in steps of:
-				--     "x x 1 10 TO = FOR"
-				--     "x x (arr) = FOR"
-				--     "x FOR" -- see this part? we need extra 'x' to feed for the FOR statement to function
-			end
-		end
-
-
-
-		printdbg("parsing line", line)
+                if varnameintm then
+                    local varname = varnameintm:match("[^= ]+")
+                    if varname then
+                        local newline = line:gsub(" "..varname.."[ =]", " $"..varname.." "..varname.." = ")
+                        line = newline:gsub("= =", "=")
+                    else
+                        _TBASIC._ERROR.SYNTAX()
+                    end
+                end
+                -- basically, "FOR x x = 1 TO 10", which converts to "x x 1 10 TO = FOR",
+                -- which is executed (in RPN) in steps of:
+                --     "x x 1 10 TO = FOR"
+                --     "x x (arr) = FOR"
+                --     "x FOR" -- see this part? we need extra 'x' to feed for the FOR statement to function
+            end
+        end
 
 
 
-		lextable = {}
-		isquote = false
-		quotemode = false
-		wordbuffer = ""
-		local function flush()
-			if (#wordbuffer > 0) then
-				table.insert(lextable, wordbuffer)
-				wordbuffer = ""
-			end
-		end
-		local function append(char)
-			wordbuffer = wordbuffer..char
-		end
-		local function append_no_whitespace(char)
-			if char ~= " " and char ~= "\t" then
-				wordbuffer = wordbuffer..char
-			end
-		end
-
-		-- return: lookless_count on success, nil on failure
-		local function isdelimeter(string)
-			local cmpval = function(table_elem) return string.hash(table_elem) end
-			local lookless_count = #string
-			local ret = nil
-			repeat
-				ret = table.binsearch(tokens, string:sub(1, lookless_count), cmpval)
-				lookless_count = lookless_count - 1
-			until ret or lookless_count < 1
-			return ret and lookless_count + 1 or false
-		end
-
-		local i = 1 -- Lua Protip: variable in 'for' is immutable, and is different from general variable table, even if they have same name
-		while i <= #line do
-			local c = string.char(line:byte(i))
-
-			local lookahead = line:sub(i, i+longest_token_len)
-
-			if isquote then
-				if c == [["]] then
-					flush()
-					isquote = false
-				else
-					append(c)
-				end
-			else
-				if c == [["]] then
-					isquote = true
-					append_no_whitespace("~")
-				else
-					local delimsize = isdelimeter(lookahead) -- returns nil if no matching delimeter found
-					if delimsize then
-						flush() -- flush buffer
-						append_no_whitespace(lookahead:sub(1, delimsize))
-						flush() -- flush this delimeter
-						i = i + delimsize - 1
-					else
-						append_no_whitespace(c)
-					end
-				end
-			end
-
-			i = i + 1
-		end
-		flush() -- don't forget this!
+        printdbg("parsing line", line)
 
 
-		return lextable
-	end
+
+        lextable = {}
+        isquote = false
+        quotemode = false
+        wordbuffer = ""
+        local function flush()
+            if (#wordbuffer > 0) then
+                table.insert(lextable, wordbuffer)
+                wordbuffer = ""
+            end
+        end
+        local function append(char)
+            wordbuffer = wordbuffer..char
+        end
+        local function append_no_whitespace(char)
+            if char ~= " " and char ~= "\t" then
+                wordbuffer = wordbuffer..char
+            end
+        end
+
+        -- return: lookless_count on success, nil on failure
+        local function isdelimeter(string)
+            local cmpval = function(table_elem) return string.hash(table_elem) end
+            local lookless_count = #string
+            local ret = nil
+            repeat
+                ret = table.binsearch(tokens, string:sub(1, lookless_count), cmpval)
+                lookless_count = lookless_count - 1
+            until ret or lookless_count < 1
+            return ret and lookless_count + 1 or false
+        end
+
+        local i = 1 -- Lua Protip: variable in 'for' is immutable, and is different from general variable table, even if they have same name
+        while i <= #line do
+            local c = string.char(line:byte(i))
+
+            local lookahead = line:sub(i, i+longest_token_len)
+
+            if isquote then
+                if c == [["]] then
+                    flush()
+                    isquote = false
+                else
+                    append(c)
+                end
+            else
+                if c == [["]] then
+                    isquote = true
+                    append_no_whitespace("~")
+                else
+                    local delimsize = isdelimeter(lookahead) -- returns nil if no matching delimeter found
+                    if delimsize then
+                        flush() -- flush buffer
+                        append_no_whitespace(lookahead:sub(1, delimsize))
+                        flush() -- flush this delimeter
+                        i = i + delimsize - 1
+                    else
+                        append_no_whitespace(c)
+                    end
+                end
+            end
+
+            i = i + 1
+        end
+        flush() -- don't forget this!
+
+
+        return lextable
+    end
 end
 
 local function readprogram(program)
-	for line in program:gmatch("[^\n]+") do
-		lineno = line:match("[0-9]+ ", 1)
-		
-		if not lineno then
-			_TBASIC._ERROR.NOLINENUM()
-		end
+    for line in program:gmatch("[^\n]+") do
+        lineno = line:match("[0-9]+ ", 1)
+        
+        if not lineno then
+            _TBASIC._ERROR.NOLINENUM()
+        end
 
-		statement = line:sub(#lineno + 1)
+        statement = line:sub(#lineno + 1)
 
-		appendcommand(tonumber(lineno), statement)
-	end
+        appendcommand(tonumber(lineno), statement)
+    end
 end
 
 do -- Avoid heap allocs for performance
-	local function stackpush(t, v)
-		t[#t + 1] = v
-	end
+    local function stackpush(t, v)
+        t[#t + 1] = v
+    end
 
-	local function stackpop(t)
-		local v = t[#t]
-		t[#t] = nil
-		return v
-	end
+    local function stackpop(t)
+        local v = t[#t]
+        t[#t] = nil
+        return v
+    end
 
-	local function stackpeek(t)
-		local v = t[#t]
-		return v
-	end
+    local function stackpeek(t)
+        local v = t[#t]
+        return v
+    end
 
-	local function unmark(word)
-		if type(word) == "table" then return word end
-		return word:sub(2, #word)
-	end
+    local function unmark(word)
+        if type(word) == "table" then return word end
+        return word:sub(2, #word)
+    end
 
-	local function isoperator(word)
-		if word == nil then return false end
-		return word:byte(1) == 35
-	end
+    local function isoperator(word)
+        if word == nil then return false end
+        return word:byte(1) == 35
+    end
 
-	local isvariable = _TBASIC.isvariable
-	local isnumber = _TBASIC.isnumber
-	local isstring = _TBASIC.isstring
+    local isvariable = _TBASIC.isvariable
+    local isnumber = _TBASIC.isnumber
+    local isstring = _TBASIC.isstring
 
-	local function isuserfunc(word)
-		if type(word) == "table" then return false end
-		if word == nil then return false end
-		return word:byte(1) == 64
-	end
+    local function isuserfunc(word)
+        if type(word) == "table" then return false end
+        if word == nil then return false end
+        return word:byte(1) == 64
+    end
 
-	local function isbuiltin(word)
-		if type(word) == "table" then return false end
-		if word == nil then return false end
-		return word:byte(1) == 38
-	end
+    local function isbuiltin(word)
+        if type(word) == "table" then return false end
+        if word == nil then return false end
+        return word:byte(1) == 38
+    end
 
-	local function iskeyword(word)
-		if word == nil then return false end
-		return isoperator(word) or isuserfunc(word) or isbuiltin(word)
-	end
+    local function iskeyword(word)
+        if word == nil then return false end
+        return isoperator(word) or isuserfunc(word) or isbuiltin(word)
+    end
 
-	local function isassign(word)
-		if word == nil then return false end
-		return word ~= "==" and word ~= ">=" and word ~= "<=" and word:byte(#word) == 61
-	end
+    local function isassign(word)
+        if word == nil then return false end
+        return word ~= "==" and word ~= ">=" and word ~= "<=" and word:byte(#word) == 61
+    end
 
-	local function isnoresolvevar(word)
-		local novarresolve = {"NEXT"}
+    local function isnoresolvevar(word)
+        local novarresolve = {"NEXT"}
 
-		for _, w in ipairs(novarresolve) do -- linear search, because the array is small
-			if word:upper() ==  w then
-				return true
-			end
-		end
+        for _, w in ipairs(novarresolve) do -- linear search, because the array is small
+            if word:upper() ==  w then
+                return true
+            end
+        end
 
-		return false
-	end
+        return false
+    end
 
-	local function execword(word, args)
-		if not _TBASIC.__appexit then
-			printdbg("--> execword", word)
-			printdbg("--> inargs", table.unpack(args))
+    local function execword(word, args)
+        if not _TBASIC.__appexit then
+            printdbg("--> execword", word)
+            printdbg("--> inargs", table.unpack(args))
 
-			-- selectively resolve variable (if it's assign func, bottommost var -- target of assignation -- will not be resolved)
-			-- for command "NEXT": DO NOT RESOLVE, pass its name (Call by Name)
-			if not isnoresolvevar(word) then
-				for i = isassign(word) and 2 or 1, #args do
-					arg = args[i]
+            -- selectively resolve variable (if it's assign func, bottommost var -- target of assignation -- will not be resolved)
+            -- for command "NEXT": DO NOT RESOLVE, pass its name (Call by Name)
+            if not isnoresolvevar(word) then
+                for i = isassign(word) and 2 or 1, #args do
+                    arg = args[i]
 
-					printdbg("--> resolvevar arg", arg)
+                    printdbg("--> resolvevar arg", arg)
 
-					if isvariable(arg) then
-						var = unmark(arg)
+                    if isvariable(arg) then
+                        var = unmark(arg)
 
-						if type(var) ~= "table" then
-							value = _TBASIC._INTPRTR.CNSTANTS[var:upper()] -- try for pre-def
+                        if type(var) ~= "table" then
+                            value = _TBASIC._INTPRTR.CNSTANTS[var:upper()] -- try for pre-def
 
-							if value == nil then
-								value = _TBASIC._INTPRTR.VARTABLE[var:upper()] -- try for user-def
-							end
+                            if value == nil then
+                                value = _TBASIC._INTPRTR.VARTABLE[var:upper()] -- try for user-def
+                            end
 
-							if value == nil then
-								_TBASIC._ERROR.NULVAR(var)
-							end
+                            if value == nil then
+                                _TBASIC._ERROR.NULVAR(var)
+                            end
 
-							args[i] = value
-						end
-					end
-				end
-			end
+                            args[i] = value
+                        end
+                    end
+                end
+            end
 
-			if word == "IF" then
-				printdbg("--> branch statement 'IF'")
-				if not args[1] then -- if condition 'false'
-					printdbg("--> if condition 'false'", table.unpack(args))
-					return "terminate_loop" -- evaluated as 'true' to Lua
-				else
-					printdbg("--> if condition 'true'", table.unpack(args))
-				end
-			end
+            if word == "IF" then
+                printdbg("--> branch statement 'IF'")
+                if not args[1] then -- if condition 'false'
+                    printdbg("--> if condition 'false'", table.unpack(args))
+                    return "terminate_loop" -- evaluated as 'true' to Lua
+                else
+                    printdbg("--> if condition 'true'", table.unpack(args))
+                end
+            end
 
-			printdbg("--> execword-outarg", table.unpack(args))
-			result = _TBASIC.LUAFN[word][1](table.unpack(args))
+            printdbg("--> execword-outarg", table.unpack(args))
+            result = _TBASIC.LUAFN[word][1](table.unpack(args))
 
-			printdbg("--> result", result)
-			stackpush(execstack, result)
-		end
-	end
+            printdbg("--> result", result)
+            stackpush(execstack, result)
+        end
+    end
 
-	function printdbg(...)
-		local debug = false
-		if debug then print("DBG", ...) end
-	end
-
-
-	function interpretline(line)
-		if not _TBASIC.__appexit then
-			--[[
-			impl
-
-			1. (normalise expr using parsewords)
-			2. use _TBASIC.RPNPARSR to convert to RPN
-			3. execute RPN op set like FORTH
-
-			* "&" - internal functions
-			* "@" - user-defined functions
-			* "$" - variables (builtin constants and user-defined) -- familiar, eh?
-			* "#" - operators
-			* "~" - strings
-			* none prepended - data (number or string)
-			]]
-
-			lextable = parsewords(line)
-			local vararg = -13 -- magic
+    function printdbg(...)
+        local debug = false
+        if debug then print("DBG", ...) end
+    end
 
 
-			if lextable and lextable[1] ~= nil then
-				if lextable[1]:upper() == "REM" then return nil end
+    function interpretline(line)
+        if not _TBASIC.__appexit then
+            --[[
+            impl
 
-				printdbg("lextable", table.concat(lextable, "|"))
+            1. (normalise expr using parsewords)
+            2. use _TBASIC.RPNPARSR to convert to RPN
+            3. execute RPN op set like FORTH
 
-				-- execute expression
-				exprlist = _TBASIC.TORPN(lextable) -- 2 2 #+ &PRINT for "PRINT 2+2"
+            * "&" - internal functions
+            * "@" - user-defined functions
+            * "$" - variables (builtin constants and user-defined) -- familiar, eh?
+            * "#" - operators
+            * "~" - strings
+            * none prepended - data (number or string)
+            ]]
 
-				printdbg("trying to exec", table.concat(exprlist, " "), "\n--------")
+            lextable = parsewords(line)
+            local vararg = -13 -- magic
 
-				execstack = {}
 
-				for _, word in ipairs(exprlist) do
-					printdbg("stack before", table.concat(execstack, " "))
-					printdbg("word", word)
+            if lextable and lextable[1] ~= nil then
+                if lextable[1]:upper() == "REM" then return nil end
 
-					if iskeyword(word) then
-						printdbg("is keyword")
+                printdbg("lextable", table.concat(lextable, "|"))
 
-						funcname = unmark(word)
-						args = {}
-						argsize = _TBASIC._GETARGS(funcname)
+                -- execute expression
+                exprlist = _TBASIC.TORPN(lextable) -- 2 2 #+ &PRINT for "PRINT 2+2"
 
-						printdbg("argsize", argsize)
+                printdbg("trying to exec", table.concat(exprlist, " "), "\n--------")
 
-						if not argsize then
-							_TBASIC._ERROR.DEV_UNIMPL(funcname)
-						else
-							if argsize ~= vararg then
-								-- consume 'argsize' elements from the stack
-								for argcnt = argsize, 1, -1 do
-									if #execstack == 0 then
-										_TBASIC._ERROR.ARGMISSING(funcname)
-									end
-									args[argcnt] = stackpop(execstack)
-								end
-							else
-								-- consume entire stack
-								local reversedargs = {}
+                execstack = {}
 
-								while #execstack > 0 and
-										(isvariable(stackpeek(execstack)) or isnumber(stackpeek(execstack)) or
-												isstring(stackpeek(execstack)))
-								do
-									stackpush(reversedargs, stackpop(execstack))
-								end
-								-- reverse 'args'
-								while #reversedargs > 0 do
-									stackpush(args, stackpop(reversedargs))
-								end
-							end
+                for _, word in ipairs(exprlist) do
+                    printdbg("stack before", table.concat(execstack, " "))
+                    printdbg("word", word)
 
-							local terminate_loop = execword(funcname, args)
+                    if iskeyword(word) then
+                        printdbg("is keyword")
 
-							if terminate_loop then
-								printdbg("--> termination of loop")
-								printdbg("--------")
-								break
-							end
-						end
-					elseif isvariable(word) then
-						printdbg("is variable")
-						stackpush(execstack, word) -- push raw variable ($ sign retained)
-					else
-						printdbg("is data")
-						stackpush(execstack, word) -- push number or string
-					end
+                        funcname = unmark(word)
+                        args = {}
+                        argsize = _TBASIC._GETARGS(funcname)
 
-					printdbg("stack after", table.concat(execstack, " "))
-					printdbg("--------")
-				end
+                        printdbg("argsize", argsize)
 
-				-- if execstack is not empty, something is wrong
-				if #execstack > 0 then
-					_TBASIC._ERROR.SYNTAX() -- cannot reliably pinpoint which statement has error; use generic error
-				end
-			end
-		end
-	end
+                        if not argsize then
+                            _TBASIC._ERROR.DEV_UNIMPL(funcname)
+                        else
+                            if argsize ~= vararg then
+                                -- consume 'argsize' elements from the stack
+                                for argcnt = argsize, 1, -1 do
+                                    if #execstack == 0 then
+                                        _TBASIC._ERROR.ARGMISSING(funcname)
+                                    end
+                                    args[argcnt] = stackpop(execstack)
+                                end
+                            else
+                                -- consume entire stack
+                                local reversedargs = {}
+
+                                while #execstack > 0 and
+                                        (isvariable(stackpeek(execstack)) or isnumber(stackpeek(execstack)) or
+                                                isstring(stackpeek(execstack)))
+                                do
+                                    stackpush(reversedargs, stackpop(execstack))
+                                end
+                                -- reverse 'args'
+                                while #reversedargs > 0 do
+                                    stackpush(args, stackpop(reversedargs))
+                                end
+                            end
+
+                            local terminate_loop = execword(funcname, args)
+
+                            if terminate_loop then
+                                printdbg("--> termination of loop")
+                                printdbg("--------")
+                                break
+                            end
+                        end
+                    elseif isvariable(word) then
+                        printdbg("is variable")
+                        stackpush(execstack, word) -- push raw variable ($ sign retained)
+                    else
+                        printdbg("is data")
+                        stackpush(execstack, word) -- push number or string
+                    end
+
+                    printdbg("stack after", table.concat(execstack, " "))
+                    printdbg("--------")
+                end
+
+                -- if execstack is not empty, something is wrong
+                if #execstack > 0 then
+                    _TBASIC._ERROR.SYNTAX() -- cannot reliably pinpoint which statement has error; use generic error
+                end
+            end
+        end
+    end
 end
 
 
 local function termination_condition()
-	return terminated or
-			_TBASIC._INTPRTR.GOTOCNTR > _TBASIC._INTPRTR.GOTOLMIT or
-			_TBASIC.__appexit or
-			#_TBASIC._INTPRTR.CALLSTCK > _TBASIC._INTPRTR.STACKMAX
+    return terminated or
+            _TBASIC._INTPRTR.GOTOCNTR > _TBASIC._INTPRTR.GOTOLMIT or
+            _TBASIC.__appexit or
+            #_TBASIC._INTPRTR.CALLSTCK > _TBASIC._INTPRTR.STACKMAX
 end
 
 local function fetchnextcmd()
-	cmd = nil
-	repeat
-		_TBASIC._INTPRTR.PROGCNTR = _TBASIC._INTPRTR.PROGCNTR + 1
-		cmd = programlist[_TBASIC._INTPRTR.PROGCNTR]
+    cmd = nil
+    repeat
+        _TBASIC._INTPRTR.PROGCNTR = _TBASIC._INTPRTR.PROGCNTR + 1
+        cmd = programlist[_TBASIC._INTPRTR.PROGCNTR]
 
-		if _TBASIC._INTPRTR.PROGCNTR > _TBASIC._INTPRTR.MAXLINES then
-			terminated = true
-			break
-		end
-	until cmd ~= nil
+        if _TBASIC._INTPRTR.PROGCNTR > _TBASIC._INTPRTR.MAXLINES then
+            terminated = true
+            break
+        end
+    until cmd ~= nil
 
-	if cmd ~= nil then
-		if _TBASIC._INTPRTR.TRACE then
-			print("PC", _TBASIC._INTPRTR.PROGCNTR)
-		end
+    if cmd ~= nil then
+        if _TBASIC._INTPRTR.TRACE then
+            print("PC", _TBASIC._INTPRTR.PROGCNTR)
+        end
 
-		return cmd
-	end
+        return cmd
+    end
 end
 
 
 local function interpretall()
 
-	terminated = false
+    terminated = false
 
-	repeat
-		interpretline(fetchnextcmd())
-	until termination_condition()
+    repeat
+        interpretline(fetchnextcmd())
+    until termination_condition()
 
-	if _TBASIC._INTPRTR.GOTOCNTR > _TBASIC._INTPRTR.GOTOLMIT then
-		_TBASIC._ERROR.TOOLONGEXEC()
-	end
+    if _TBASIC._INTPRTR.GOTOCNTR > _TBASIC._INTPRTR.GOTOLMIT then
+        _TBASIC._ERROR.TOOLONGEXEC()
+    end
 end
 
 -- END OF LEXER ---------------------------------------------------------------
@@ -497,18 +497,18 @@ local testprogram = nil
 
 
 _G._TBASIC.EXEC = function(cmdstring) -- you can access this interpreter with this global function
-	_TBASIC._INTPRTR.RESET()
-	programlist = {}
-	readprogram(cmdstring)
-	interpretall()
+    _TBASIC._INTPRTR.RESET()
+    programlist = {}
+    readprogram(cmdstring)
+    interpretall()
 end
 
 
 if testprogram then
-	_TBASIC._INTPRTR.RESET()
-	programlist = {}
-	readprogram(testprogram)
-	interpretall()
+    _TBASIC._INTPRTR.RESET()
+    programlist = {}
+    readprogram(testprogram)
+    interpretall()
 end
 
 
