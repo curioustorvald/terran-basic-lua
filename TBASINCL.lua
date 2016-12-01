@@ -691,7 +691,11 @@ local function _opeq(lval, rval)
 end
 
 local function _opne(lval, rval)
-    return booleanise(not _opeq(lval, rval))
+    if tonumber(lval) and tonumber(rval) then
+        return booleanise(tonumber(lval) ~= tonumber(rval))
+    else
+        return booleanise(__checkstring(lval) ~= __checkstring(rval))
+    end
 end
 
 local function _opgt(lval, rval) 
