@@ -9,11 +9,13 @@ Every job is done within ```TBASEXTN.lua```. If you don't have one, make new one
     -- TBASIC extension
     
     -- these are utilities. Do not delete these lines
-    local __assert      = _G._TBASIC.__assert
-    local __assertlhand = _G._TBASIC.__assertlhand
-    local __assertrhand = _G._TBASIC.__assertrhand
-    local __checknumber = _G._TBASIC.__checknumber
-    local __checkstring = _G._TBASIC.__checkstring
+    local __assert        = _TBASIC.__assert
+    local __assertlhand   = _TBASIC.__assertlhand
+    local __assertrhand   = _TBASIC.__assertrhand
+    local __checknumber   = _TBASIC.__checknumber
+    local __checkstring   = _TBASIC.__checkstring
+    local __readvar       = _TBASIC.__readvar
+    local __resolvevararg = _TBASIC.__resolvevararg
     -- end of utilities
 
 
@@ -23,6 +25,9 @@ To check if it's a number, you use ```__checknumber```. To check if it's letters
 
 When it comes to name your *word*s that explains orders to the computer, their name starts with ```_fn```, if it's about *mark*s, their name starts with ```_op```.
 
+<<if you want use function arguments or variables, they must be resolved using ```__readvar```>>
+
+<<``__resolvevararg``>>
 
 ## To make it understand your new sets of words
 
@@ -50,7 +55,7 @@ Here's how it's done:
    at the bottom.
         
 2. Add ```"UPGOER"``` to ```_TBASIC._FNCTION``` (enter this: ```table.insert(_TBASIC._FNCTION, "UPGOER")``` to the next line)
-3. Add  ```{_fnupgoer, 1}``` to ```_TBASIC.LUAFN```. Number ```1``` means that it will take that number of things to do something. (enter this: ```_TBASIC.LUAFN.UPGOER = {_fnupgoer, 1}``` to the next line)
+3. Add  ```{_fnupgoer, 1}``` to ```_TBASIC.LUAFN.UPGOER```. Meaning of the word ```UPGOER``` should be obvious, number ```1``` means that it will take that number of things to do something. (enter this: ```_TBASIC.LUAFN.UPGOER = {_fnupgoer, 1}``` to the next line)
 4. Done!
 
 
@@ -61,3 +66,5 @@ Here's how it's done:
 * ```__checkstring(letters)``` returns letters ```letters``` if it can be written as letters.
 
 * ```__assert(thing, type)``` will check the type of ```thing``` is a ```type```. If it is, computer will move on. If not, it will stop and say something.
+
+* ```__readvar(varname)``` will 

@@ -19,7 +19,7 @@ args = {...}
 
 print(_G._TBASIC._HEADER)
 _TBASIC.PROMPT()
-_TBASIC.SHOWLUAERROR = false
+--_TBASIC.SHOWLUAERROR = false
 
 
 local function concat_lines(lines, startindex, endindex)
@@ -131,7 +131,7 @@ else
             terminate_app = true
             break
         elseif line:sub(1,6):match("[0-9]+ ") then -- enter new command (this limits max linumber to be 99999)
-            local lineno = line:sub(1,6):match("[0-9]+ ", 1)
+            local lineno = line:sub(1,6):match("[0-9]+ ", 1) -- ditto
             local statement = line:sub(#lineno + 1)
             lines[tonumber(lineno)] = statement
             __read = true

@@ -275,54 +275,14 @@ do -- Avoid heap allocs for performance
         return word ~= "==" and word ~= ">=" and word ~= "<=" and word:byte(#word) == 61
     end
 
-    local function isnoresolvevar(word)
-        local novarresolve = {"NEXT"}
-
-        for _, w in ipairs(novarresolve) do -- linear search, because the array is small
-            if word:upper() ==  w then
-                return true
-            end
-        end
-
-        return false
-    end
-
     local function execword(word, args)
         if not _TBASIC.__appexit then
             printdbg("--> execword", word)
-            printdbg("--> inargs", table.unpack(args))
-
-            -- selectively resolve variable (if it's assign func, bottommost var -- target of assignation -- will not be resolved)
-            -- for command "NEXT": DO NOT RESOLVE, pass its name (Call by Name)
-            if not isnoresolvevar(word) then
-                for i = isassign(word) and 2 or 1, #args do
-                    arg = args[i]
-
-                    printdbg("--> resolvevar arg", arg)
-
-                    if isvariable(arg) then
-                        var = unmark(arg)
-
-                        if type(var) ~= "table" then
-                            value = _TBASIC._INTPRTR.CNSTANTS[var:upper()] -- try for pre-def
-
-                            if value == nil then
-                                value = _TBASIC._INTPRTR.VARTABLE[var:upper()] -- try for user-def
-                            end
-
-                            if value == nil then
-                                _TBASIC._ERROR.NULVAR(var)
-                            end
-
-                            args[i] = value
-                        end
-                    end
-                end
-            end
+            printdbg("--> execword_args", table.unpack(args))
 
             if word == "IF" then
                 printdbg("--> branch statement 'IF'")
-                if not args[1] then -- if condition 'false'
+                if not _TBASIC.__readvar(args[1]) then -- if condition 'false'
                     printdbg("--> if condition 'false'", table.unpack(args))
                     return "terminate_loop" -- evaluated as 'true' to Lua
                 else
@@ -330,7 +290,7 @@ do -- Avoid heap allocs for performance
                 end
             end
 
-            printdbg("--> execword-outarg", table.unpack(args))
+            printdbg("--> execword_outarg", table.unpack(args))
             result = _TBASIC.LUAFN[word][1](table.unpack(args))
 
             printdbg("--> result", result)

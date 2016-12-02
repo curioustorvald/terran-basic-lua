@@ -243,28 +243,71 @@ end
 
 -- FUNCTION IMPLEMENTS --------------------------------------------------------
 
-local function __assert(arg, expected)
+local function __readvar(varname)
+    -- if varname is a string that can be represented as number, returns tonumber(varname) ("4324" -> 4324)
+    -- if varname is a TBASIC string, return resolved string ("~FOOBAR" -> "FOOBAR")
+    -- if varname is a TBASIC variable, return resolved variable ("$FOO" -> any value stored in variable 'FOO')
+
+    --print("readvar_varname", varname)
+
+    if type(varname) == "table" or type(varname) == "nil" or type(varname) == "boolean" then
+        return varname
+    end
+
+    if tonumber(varname) then
+        return tonumber(varname)
+    end
+
+    if varname:byte(1) == 126 then
+        return varname:sub(2, #varname)
+    end
+
+    if varname:byte(1) == 36 then
+        local data = varname:sub(2, #varname)
+        if tonumber(data) then
+            return tonumber(data)
+        else
+            -- try for constants
+            local retval = _TBASIC._INTPRTR.CNSTANTS[data:upper()]
+            if retval ~= nil then return retval
+            -- try for variable table
+            else return _TBASIC._INTPRTR.VARTABLE[data:upper()] end
+        end
+    else
+        return varname -- already resolved
+    end
+end
+
+local function __assert(aarg, expected)
+    local arg = __readvar(aarg)
+
     if type(arg) ~= expected then
         _TBASIC._ERROR.ILLEGALARG(expected, type(arg))
         return
     end
 end
 
-local function __assertlhand(lval, expected)
+local function __assertlhand(llval, expected)
+    local lval = __readvar(llval)
+
     if type(lval) ~= expected then
         _TBASIC._ERROR.ILLEGALARG("LHAND: "..expected, type(lval))
         return
     end
 end
 
-local function __assertrhand(rval, expected)
+local function __assertrhand(rrval, expected)
+    local rval = __readvar(rrval)
+
     if type(rval) ~= expected then
         _TBASIC._ERROR.ILLEGALARG("RHAND: "..expected, type(rval))
         return
     end
 end
 
-local function __checknumber(arg)
+local function __checknumber(aarg)
+    local arg = __readvar(aarg)
+
     if arg == nil then
         _TBASIC._ERROR.ILLEGALARG("number", type(arg))
         return
@@ -286,7 +329,9 @@ local function __checknumber(arg)
     end
 end
 
-local function __checkstring(arg)
+local function __checkstring(aarg)
+    local arg = __readvar(aarg)
+
     if type(arg) == "function" then
         _TBASIC._ERROR.ILLEGALARG("STRING/NUMBER/BOOL", type(arg))
         return
@@ -303,11 +348,21 @@ local function __checkstring(arg)
     return strarg:byte(1) == 126 and strarg:sub(2, #strarg) or strarg
 end
 
-_G._TBASIC.__assert      = __assert
-_G._TBASIC.__assertlhand = __assertlhand
-_G._TBASIC.__assertrhand = __assertrhand
-_G._TBASIC.__checknumber = __checknumber
-_G._TBASIC.__checkstring = __checkstring
+local function __resolvevararg(...)
+    local ret = {}
+    for _, varname in ipairs({...}) do
+        table.insert(ret, __readvar(varname))
+    end
+    return ret
+end
+
+_G._TBASIC.__assert        = __assert
+_G._TBASIC.__assertlhand   = __assertlhand
+_G._TBASIC.__assertrhand   = __assertrhand
+_G._TBASIC.__checknumber   = __checknumber
+_G._TBASIC.__checkstring   = __checkstring
+_G._TBASIC.__readvar       = __readvar
+_G._TBASIC.__resolvevararg = __resolvevararg
 
 
 --[[
@@ -339,7 +394,7 @@ local function _fnprint(...)
         end
     end
 
-    local args = {...}
+    local args = __resolvevararg(...)
 
     if #args < 1 then
         io.write ""
@@ -367,7 +422,7 @@ local function _fngoto(lnum)
 end
 
 local function _fnnewvar(varname, value)
-    _TBASIC._INTPRTR.VARTABLE[varname:upper()] = value
+    _TBASIC._INTPRTR.VARTABLE[varname:upper()] = __readvar(value)
 end
 
 local function _fngosub(lnum)
@@ -392,10 +447,12 @@ local function _fnabort()
 end
 
 local function _fnabortmsg(reason)
-    _TBASIC._ERROR.ABORT(__checkstring(reason))
+    _TBASIC._ERROR.ABORT(__checkstring(__readvar(reason)))
 end
 
-local function _fnif(bool)
+local function _fnif(bbool)
+    local bool = __readvar(bbool)
+
     __assert(bool, "boolean")
 
     if bool == nil then
@@ -413,9 +470,6 @@ local function _fnnop()
 end
 
 local function _fnfor(seq)
-    --print("TEST: INTEGER SEQUENCE")
-    --print(table.concat(seq, " "))
-    
     stackpush(_TBASIC._INTPRTR.CALLSTCK, _TBASIC._INTPRTR.PROGCNTR)
 end
 
@@ -533,9 +587,9 @@ local function _fnloge(n)
 end
 
 local function _fnmax(...)
-    local args = {... }
+    local args = __resolvevararg(...)
     if #args < 1 then
-        _TBASIC._ERROR.ILLEGALARG()
+        _TBASIC._ERROR.ARGMISSING("MAX")
         return
     end
 
@@ -548,9 +602,9 @@ local function _fnmax(...)
 end
 
 local function _fnmin(...)
-    local args = {... }
+    local args = __resolvevararg(...)
     if #args < 1 then
-        _TBASIC._ERROR.ILLEGALARG()
+        _TBASIC._ERROR.ARGMISSING("MIN")
         return
     end
 
@@ -582,7 +636,7 @@ end
 local function _fntostring(n)
     local ret = tostring(__checknumber(n))
     if not ret then
-        _TBASIC._ERROR.ILLEGARARG()
+        _TBASIC._ERROR.ILLEGALARG()
         return
     else
         return "~"..ret
@@ -598,6 +652,22 @@ local function _fntan(n)
     return math.tan(__checknumber(n))
 end
 
+local function _fninput(...) -- INPUT(var1, [var2, var3 ...])
+    local args = {...}
+    local prompt = "Your input?"
+
+    if #args < 1 then
+        _TBASIC._ERROR.ARGMISSING("INPUT")
+        return
+    else
+        for _, varname in ipairs(args) do
+            print(prompt)
+            local value = io.read()
+            _opassign(varname, value)
+        end
+    end
+end
+
 
 
 
@@ -607,7 +677,10 @@ local function booleanise(bool)
     return bool and "$TRUE" or "$FALSE"
 end
 
-local function _opconcat(lval, rval)
+function _opconcat(llval, rrval)
+    local lval = __readvar(llval)
+    local rval = __readvar(rrval)
+
     if type(lval) == "function" then _TBASIC._ERROR.ILLEGALARG("VALUE", "FUNCTION") return end
     if type(rval) == "function" then _TBASIC._ERROR.ILLEGALARG("VALUE", "FUNCTION") return end
 
@@ -617,23 +690,28 @@ local function _opconcat(lval, rval)
     return "~"..l..r
 end
 
-local function _opplus(lval, rval)
+function _opplus(lval, rval)
     local l = __checknumber(lval)
     local r = __checknumber(rval)
 
     return l + r
 end
 
-local function _optimes(lval, rval)
+function _optimes(lval, rval)
     local l = __checknumber(lval)
     local r = __checknumber(rval)
 
     return l * r
 end
 
-local function _opminus(lval, rval) return _opplus(lval, -rval) end
+function _opminus(lval, rval)
+    local l = __checknumber(lval)
+    local r = __checknumber(rval)
 
-local function _opdiv(lval, rval)
+    return l - r
+end
+
+function _opdiv(lval, rval)
     local l = __checknumber(lval)
     local r = __checknumber(rval)
 
@@ -648,7 +726,7 @@ local function _opdiv(lval, rval)
     end
 end
 
-local function _opmodulo(lval, rval)
+function _opmodulo(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -656,7 +734,7 @@ local function _opmodulo(lval, rval)
     return math.fmod(l, r)
 end
 
-local function _oppower(lval, rval)
+function _oppower(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -664,7 +742,7 @@ local function _oppower(lval, rval)
     return math.pow(l, r) -- 0^0 is 1 according to the spec, and so is the Lua's.
 end
 
-local function _opassign(var, value)
+function _opassign(var, value)
     if _TBASIC.isnumber(var) or _TBASIC.isfunction(var) or _TBASIC.isoperator(var) or _TBASIC.isargsep(var) then
         _TBASIC._ERROR.ILLEGALNAME(var)
         return
@@ -679,10 +757,13 @@ local function _opassign(var, value)
         return
     end
 
-    _TBASIC._INTPRTR.VARTABLE[varname:upper()] = value
+    _TBASIC._INTPRTR.VARTABLE[varname:upper()] = __readvar(value)
 end
 
-local function _opeq(lval, rval)
+function _opeq(llval, rrval)
+    local lval = __readvar(llval)
+    local rval = __readvar(rrval)
+
     if tonumber(lval) and tonumber(rval) then
         return booleanise(tonumber(lval) == tonumber(rval))
     else
@@ -690,7 +771,10 @@ local function _opeq(lval, rval)
     end
 end
 
-local function _opne(lval, rval)
+function _opne(llval, rrval)
+    local lval = __readvar(llval)
+    local rval = __readvar(rrval)
+
     if tonumber(lval) and tonumber(rval) then
         return booleanise(tonumber(lval) ~= tonumber(rval))
     else
@@ -698,7 +782,7 @@ local function _opne(lval, rval)
     end
 end
 
-local function _opgt(lval, rval) 
+function _opgt(lval, rval) 
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -706,7 +790,7 @@ local function _opgt(lval, rval)
     return booleanise(l > r)
 end
 
-local function _oplt(lval, rval) 
+function _oplt(lval, rval) 
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -714,7 +798,7 @@ local function _oplt(lval, rval)
     return booleanise(l < r)
 end
 
-local function _opge(lval, rval) 
+function _opge(lval, rval) 
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -722,7 +806,7 @@ local function _opge(lval, rval)
     return booleanise(l >= r)
 end
 
-local function _ople(lval, rval) 
+function _ople(lval, rval) 
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -730,7 +814,7 @@ local function _ople(lval, rval)
     return booleanise(l <= r)
 end
 
-local function _opband(lval, rval)
+function _opband(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -738,7 +822,7 @@ local function _opband(lval, rval)
     return bit.band(l, r)
 end
 
-local function _opbor(lval, rval)
+function _opbor(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -746,7 +830,7 @@ local function _opbor(lval, rval)
     return bit.bor(l, r)
 end
 
-local function _opbxor(lval, rval)
+function _opbxor(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -754,7 +838,7 @@ local function _opbxor(lval, rval)
     return bit.bxor(l, r)
 end
 
-local function _opbnot(lval, rval)
+function _opbnot(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -762,7 +846,7 @@ local function _opbnot(lval, rval)
     return bit.bnot(l, r)
 end
 
-local function _oplshift(lval, rval)
+function _oplshift(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -770,7 +854,7 @@ local function _oplshift(lval, rval)
     return bit.lshift(l, r)
 end
 
-local function _oprshift(lval, rval)
+function _oprshift(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -778,7 +862,7 @@ local function _oprshift(lval, rval)
     return bit.arshift(l, r)
 end
 
-local function _opurshift(lval, rval)
+function _opurshift(lval, rval)
     local expected = "number"
     local l = __checknumber(lval)
     local r = __checknumber(rval)
@@ -786,7 +870,9 @@ local function _opurshift(lval, rval)
     return bit.rshift(l, r)
 end
 
-local function _opsizeof(target)
+function _opsizeof(ttarget)
+    local target = __readvar(ttarget)
+
     if type(target) == "table" then
         -- TODO return dimensional size
         return #target
@@ -796,21 +882,21 @@ local function _opsizeof(target)
     end
 end
 
-local function _opland(lhand, rhand)
-    return booleanise(lhand and rhand)
+function _opland(lhand, rhand)
+    return booleanise(__readvar(lhand) and __readvar(rhand))
 end
 
-local function _oplor(lhand, rhand)
-    return booleanise(lhand or rhand)
+function _oplor(lhand, rhand)
+    return booleanise(__readvar(lhand) or __readvar(rhand))
 end
 
-local function _oplnot(rhand)
-    return booleanise(not rhand)
+function _oplnot(rhand)
+    return booleanise(not __readvar(rhand))
 end
 
-local function _opintrange(x, y) -- x TO y -> {x..y}
+function _opintrange(x, y) -- x TO y -> {x..y}
     local from = __checknumber(x)
-    local to = __checknumber(y)
+    local to   = __checknumber(y)
 
     local seq = {}
     if from < to then
@@ -826,7 +912,9 @@ local function _opintrange(x, y) -- x TO y -> {x..y}
     return seq
 end
 
-local function _opintrangestep(seq, stp) -- i know you can just use "for i = from, to, step"
+function _opintrangestep(sseq, sstp) -- i know you can just use "for i = from, to, step"
+    local seq = __readvar(sseq)
+    local stp = __readvar(sstp)
     local step = __checknumber(stp)      -- but that's just how not this stack machine works...
     __assert(seq, "table")
 
@@ -843,7 +931,7 @@ local function _opintrangestep(seq, stp) -- i know you can just use "for i = fro
     return newseq
 end
 
-local function _opunaryminus(n)
+function _opunaryminus(n)
     local num = __checknumber(n)
     return -num
 end
@@ -852,7 +940,7 @@ local vararg = -13 -- magic
 
 _G._TBASIC.LUAFN = {    
     -- variable control
-    CLR   = {function() _TBASIC._INTPRTR.VARTABLE = {} end, 0},
+    CLR     = {function() _TBASIC._INTPRTR.VARTABLE = {} end, 0},
     -- flow control
     IF      = {_fnif, 1},
     THEN    = {_fnnop, 0},
@@ -866,6 +954,7 @@ _G._TBASIC.LUAFN = {
     NEXT    = {_fnnext, vararg},
     -- stdio
     PRINT   = {_fnprint, vararg},
+    INPUT   = {_fninput, vararg},
     -- mathematics
     ABS     = {_fnabs, 1},
     CBRT    = {_fncbrt, 1},
@@ -965,7 +1054,7 @@ local opassoc = {
 local function exprerr(token)
     _TBASIC._ERROR.SYNTAXAT(token)
 end
-local function _op_precd(op)
+function _op_precd(op)
     -- take care of prematurely prepended '#'
     local t1 = op:byte(1) == 35 and op:sub(2, #op) or op
     op = t1:upper()
@@ -980,14 +1069,14 @@ local function _op_precd(op)
     exprerr("precedence of "..op)
 end
 
-local function _op_isrtl(op)
+function _op_isrtl(op)
     for _, v in ipairs(opassoc.rtl) do
         if op == v then return true end
     end
     return false
 end
 
-local function _op_isltr(op)
+function _op_isltr(op)
     return not _op_isrtl(op)
 end
 
@@ -1080,8 +1169,9 @@ _G._TBASIC.TORPN = function(exprarray)
 
     local isfunction = _TBASIC.isfunction
     local isoperator = _TBASIC.isoperator
-    local isargsep = _TBASIC.isargsep
-    local isnumber = _TBASIC.isnumber
+    local isargsep   = _TBASIC.isargsep
+    local isnumber   = _TBASIC.isnumber
+    local isstring   = _TBASIC.isstring
 
     for _, token in ipairs(exprarray) do--expr:gmatch("[^ ]+") do
         if token == nil then error("Token is nil!") end
@@ -1163,15 +1253,12 @@ _G._TBASIC.TORPN = function(exprarray)
 
             -- stack empty without finding left paren, ERROR!
             --if not found_left_paren and #stack == 0 then exprerr(token) end -- mismatched parens
-        elseif _TBASIC._INTPRTR.VARTABLE[token:upper()] ~= nil or 
-               _TBASIC._INTPRTR.CNSTANTS[token:upper()] ~= nil then -- if the token is variable
-            printdbg("is variable")
-
-            stackpush(outqueue, "$"..token:upper())
-        else
+        elseif isstring(token) then
             printdbg("is data")
-
             stackpush(outqueue, token) -- arbitrary data
+        else -- a word without '~' or anything; assume it's a variable name
+            printdbg("is variable")
+            stackpush(outqueue, "$"..token:upper())
         end
         printdbg("STACKTRACE", table.concat(stack, " "))
         printdbg("OUTPUT", table.concat(outqueue, " "))
