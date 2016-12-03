@@ -651,8 +651,8 @@ end
 
 local function _fninput(...) -- INPUT(var1, [var2, var3 ...])
     local args = {...}
-    local prompt = "Your input ? "
-    local prompt_numbered = "Your input (%d of %d) ? "
+    local prompt = "YOUR INPUT ? "
+    local prompt_numbered = "YOUR INPUT (%d OF %d) ? "
 
     if #args < 1 then
         _TBASIC._ERROR.ARGMISSING("INPUT")
