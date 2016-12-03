@@ -1,6 +1,6 @@
 -- TBASIC extension
 
--- these are utilities. Do not delete these lines
+-- these are utilities. Do not touch these lines
 local __assert        = _TBASIC.__assert
 local __assertlhand   = _TBASIC.__assertlhand
 local __assertrhand   = _TBASIC.__assertrhand
@@ -8,6 +8,7 @@ local __checknumber   = _TBASIC.__checknumber
 local __checkstring   = _TBASIC.__checkstring
 local __readvar       = _TBASIC.__readvar
 local __resolvevararg = _TBASIC.__resolvevarar
+local vararg          = -13 -- magic
 -- end of utilities
 
 
