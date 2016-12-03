@@ -409,7 +409,6 @@ end
 
 local function termination_condition()
     return terminated or
-            _TBASIC._INTPRTR.GOTOCNTR > _TBASIC._INTPRTR.GOTOLMIT or
             _TBASIC.__appexit or
             #_TBASIC._INTPRTR.CALLSTCK > _TBASIC._INTPRTR.STACKMAX
 end
@@ -443,10 +442,6 @@ local function interpretall()
     repeat
         interpretline(fetchnextcmd())
     until termination_condition()
-
-    if _TBASIC._INTPRTR.GOTOCNTR > _TBASIC._INTPRTR.GOTOLMIT then
-        _TBASIC._ERROR.TOOLONGEXEC()
-    end
 end
 
 -- END OF LEXER ---------------------------------------------------------------

@@ -219,13 +219,13 @@ end
 
 _G._TBASIC._INTPRTR.RESET = function()
     _TBASIC.__appexit = false
-    _G._TBASIC._INTPRTR.PROGCNTR = 0
-    _G._TBASIC._INTPRTR.MAXLINES = 63999
-    _G._TBASIC._INTPRTR.VARTABLE = {} -- table of variables. [NAME] = data
-    _G._TBASIC._INTPRTR.FNCTABLE = {} -- table of functions. [NAME] = array of strings? (TBA)
-    _G._TBASIC._INTPRTR.CALLSTCK = {}
-    _G._TBASIC._INTPRTR.STACKMAX = 200
-    _G._TBASIC._INTPRTR.CNSTANTS = {
+    _TBASIC._INTPRTR.PROGCNTR = 0
+    _TBASIC._INTPRTR.MAXLINES = 63999
+    _TBASIC._INTPRTR.VARTABLE = {} -- table of variables. [NAME] = data
+    _TBASIC._INTPRTR.FNCTABLE = {} -- table of functions. [NAME] = array of strings? (TBA)
+    _TBASIC._INTPRTR.CALLSTCK = {} -- return points (line number)
+    _TBASIC._INTPRTR.STACKMAX = 2000
+    _TBASIC._INTPRTR.CNSTANTS = {
         M_PI    = 3.141592653589793, -- this is a standard implementation
         M_2PI   = 6.283185307179586, -- this is a standard implementation
         M_E     = 2.718281828459045, -- this is a standard implementation
@@ -235,8 +235,6 @@ _G._TBASIC._INTPRTR.RESET = function()
         NIL = nil,
         _VERSION = _TBASIC._VERSION
     }
-    _G._TBASIC._INTPRTR.GOTOCNTR = 0
-    _G._TBASIC._INTPRTR.GOTOLMIT = 16384
 end
 
 
@@ -417,7 +415,6 @@ local function _fngoto(lnum)
         return
     end
 
-    _TBASIC._INTPRTR.GOTOCNTR = _TBASIC._INTPRTR.GOTOCNTR + 1
     _TBASIC._INTPRTR.PROGCNTR = linenum - 1
 end
 
