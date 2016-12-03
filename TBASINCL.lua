@@ -651,14 +651,22 @@ end
 
 local function _fninput(...) -- INPUT(var1, [var2, var3 ...])
     local args = {...}
-    local prompt = "Your input?"
+    local prompt = "Your input ? "
+    local prompt_numbered = "Your input (%d of %d) ? "
 
     if #args < 1 then
         _TBASIC._ERROR.ARGMISSING("INPUT")
         return
     else
-        for _, varname in ipairs(args) do
-            print(prompt)
+        for argcount, varname in ipairs(args) do
+            -- if there's two or more input, a number will be shown
+            if #args >= 2 then
+                io.write(string.format(prompt_numbered, argcount, #args))
+            else
+                io.write(prompt)
+            end
+            io.flush() -- print out the line right away
+
             local value = io.read()
             _opassign(varname, value)
         end
