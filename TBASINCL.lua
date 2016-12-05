@@ -188,6 +188,7 @@ _G._TBASIC._OPERATR = {
     "%", -- math.fmod
     "TO", "STEP", -- integer sequence operator
     "MINUS", -- unary minus
+    "+=", "-=", "*=", "/=", "%=" -- C-style assign
 }
 _G._TBASIC._INTPRTR = {}
 _G._TBASIC._INTPRTR.TRACE = false -- print program counter while execution
@@ -950,6 +951,62 @@ function _opunaryminus(n)
     return -num
 end
 
+function _opplusassign(var, value)
+    if type(__readvar(var)) == "number" then
+        _opassign(var, __readvar(var) + __checknumber(value))
+    else
+        _TBASIC._ERROR.ILLEGALARG()
+        return
+    end
+end
+
+function _opminusassign(var, value)
+    if type(__readvar(var)) == "number" then
+        _opassign(var, __readvar(var) - __checknumber(value))
+    else
+        _TBASIC._ERROR.ILLEGALARG()
+        return
+    end
+end
+
+function _optimesassign(var, value)
+    if type(__readvar(var)) == "number" then
+        _opassign(var, __readvar(var) * __checknumber(value))
+    else
+        _TBASIC._ERROR.ILLEGALARG()
+        return
+    end
+end
+
+function _opdivassign(var, value)
+    if type(__readvar(var)) == "number" then
+        if __checknumber(value) == 0 then
+            _TBASIC._ERROR.DIV0()
+            return
+        else
+            _opassign(var, __readvar(var) / __checknumber(value))
+        end
+    else
+        _TBASIC._ERROR.ILLEGALARG()
+        return
+    end
+end
+
+function _opmodassign(var, value)
+    if type(__readvar(var)) == "number" then
+        if __checknumber(value) == 0 then
+            _TBASIC._ERROR.DIV0()
+            return
+        else
+            _opassign(var, math.fmod(__readvar(var), __checknumber(value)))
+        end
+    else
+        _TBASIC._ERROR.ILLEGALARG()
+        return
+    end
+end
+
+
 local vararg = -13 -- magic
 
 _G._TBASIC.LUAFN = {    
@@ -1014,6 +1071,8 @@ _G._TBASIC.LUAFN = {
     [">"]   = {_opgt, 2},
     ["<"]   = {_oplt, 2},
     ["="]   = {_opassign, 2}, [":="] = {_opassign, 2},
+    ["+="]  = {_opplusassign, 2}, ["-="] = {_opminusassign, 2},
+    ["*="]  = {_optimesassign, 2}, ["/="] = {_opdivassign, 2}, ["%="] = {_opmodassign, 2},
     SIZEOF  = {_opsizeof, 1},
     MINUS   = {_opunaryminus, 1},
     -- logical operators
@@ -1045,7 +1104,7 @@ end
 -- PARSER IMPL ----------------------------------------------------------------
 
 local opprecedence = {
-    {":=", "="}, -- least important
+    {":=", "=", "+=", "-=", "*=", "/=", "%="}, -- least important
     {"OR"},
     {"AND"},
     {"|"},
