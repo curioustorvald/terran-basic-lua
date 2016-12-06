@@ -19,7 +19,7 @@ args = {...}
 
 print(_G._TBASIC._HEADER)
 _TBASIC.PROMPT()
---_TBASIC.SHOWLUAERROR = false
+_TBASIC.SHOWLUAERROR = false
 
 
 local function concat_lines(lines, startindex, endindex)

@@ -275,6 +275,7 @@ do -- Avoid heap allocs for performance
         return word ~= "==" and word ~= ">=" and word ~= "<=" and word:byte(#word) == 61
     end
 
+    -- returns truthy value "terminate_loop" upon termination of loop; nil otherwise.
     local function execword(word, args)
         if not _TBASIC.__appexit then
             printdbg("--> execword", word)
@@ -446,14 +447,13 @@ end
 
 -- END OF LEXER ---------------------------------------------------------------
 
-_TBASIC.SHOWLUAERROR = false
+-- _TBASIC.SHOWLUAERROR = false -- commented; let the shell handle it
 
 local testprogram = nil
 
-
 _G._TBASIC.EXEC = function(cmdstring) -- you can access this interpreter with this global function
     _TBASIC._INTPRTR.RESET()
-    programlist = {}
+    programlist = {} -- is this necessary?
     readprogram(cmdstring)
     interpretall()
 end
@@ -461,7 +461,7 @@ end
 
 if testprogram then
     _TBASIC._INTPRTR.RESET()
-    programlist = {}
+    programlist = {} -- is this necessary?
     readprogram(testprogram)
     interpretall()
 end

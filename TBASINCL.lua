@@ -853,12 +853,11 @@ function _opbxor(lval, rval)
     return bit.bxor(l, r)
 end
 
-function _opbnot(lval, rval)
+function _opbnot(val)
     local expected = "number"
-    local l = __checknumber(lval)
-    local r = __checknumber(rval)
+    local v = __checknumber(val)
 
-    return bit.bnot(l, r)
+    return bit.bnot(v)
 end
 
 function _oplshift(lval, rval)
@@ -1085,13 +1084,13 @@ _G._TBASIC.LUAFN = {
     [">>>"] = {_opurshift, 2}, -- bit.rshift
     ["|"]   = {_opbor, 2},
     ["&"]   = {_opband, 2},
-    ["!"]   = {_opbnot, 2},
+    ["!"]   = {_opbnot, 1},
     XOR     = {_opbxor, 2},
     -- int sequence
     TO      = {_opintrange, 2},
     STEP    = {_opintrangestep, 2},
     -- misc
-    REM     = {function() end, 0}
+    REM     = {_fnnop, 0}
 }
 _G._TBASIC._GETARGS = function(func)
     local f = _TBASIC.LUAFN[func]

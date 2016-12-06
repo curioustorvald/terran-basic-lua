@@ -13,10 +13,11 @@ The program will work with any Lua implementation that supports __Lua 5.2__ and 
 * ```TBASIC.lua```: Terran BASIC shell
 * ```TBASEXEC.lua```: Terran BASIC interpreter
 * ```TBASINCL.lua```: Terran BASIC interpreter library
+* ```TBASEXTN.lua```: Terran BASIC extension
 * ```doc/TBASMAN.pdf```: Language manual. READ IT
 * ```doc/TBASMAN.tex```: Source for the manual
-* ```README.md```: Just read it
-* ```LICENSE.md```: Also just read it
+* ```README.md```: What you are reading right now
+* ```LICENSE.md```: It's MIT
 
 
 ## How to Use
@@ -24,10 +25,11 @@ The program will work with any Lua implementation that supports __Lua 5.2__ and 
 Run ```TBASIC.lua``` to get started.
 
 * Prefix line numbers to input multiple-lined commands.
-* Enter command without line number to execute the command right away. Any input program will left untouched.
-* Enter ```RUN``` to execute the program you have written, enter ```LIST``` to see what have you enter to the buffer.
+* Enter command without line number to execute the one-liner command right away. Any input program will left untouched.
+* Enter ```RUN``` to execute the program you have written, enter ```LIST``` to see what you have entered to the buffer.
 * After the ```RUN```, your program will still be there. Enter ```NEW``` to wipe out them.
 * Made some mistakes? No worries, you can just overwrite by re-writing the line you wish to correct.
+* Line numbers too messy? Try ```RENUM```, your GOTOs and GOSUBs will be updated accordingly.
 
 
 ## Syntax
