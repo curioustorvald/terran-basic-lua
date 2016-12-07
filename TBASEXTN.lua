@@ -28,4 +28,7 @@ _TBASIC.LUAFN.UPGOER = {_fnupgoer, 1}
 ]]
 
 
-
+-- little debugger's blessing
+local function _fnenableluatrace() _TBASIC.SHOWLUAERROR = true end
+table.insert(_TBASIC._FNCTION, "LUATRACEON")
+_TBASIC.LUAFN.LUATRACEON = {_fnenableluatrace, 0}
