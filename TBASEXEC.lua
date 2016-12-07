@@ -452,6 +452,7 @@ local testprogram = nil
 
 _G._TBASIC.EXEC = function(cmdstring) -- you can access this interpreter with this global function
     _TBASIC._INTPRTR.RESET()
+    programlist = {} -- wipe out previous commands from interpreter (do not delete)
     readprogram(cmdstring)
     interpretall()
 end
@@ -459,6 +460,7 @@ end
 
 if testprogram then
     _TBASIC._INTPRTR.RESET()
+    programlist = {} -- wipe out previous commands from interpreter (do not delete)
     readprogram(testprogram)
     interpretall()
 end
