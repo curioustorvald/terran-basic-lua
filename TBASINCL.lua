@@ -178,8 +178,7 @@ _G._TBASIC._OPERATR = {
     -- operators
     ">>>", "<<", ">>", "|", "&", "XOR", "!", -- bitwise operations
     ";", -- string concatenation
-    "SIZEOF", -- LENGTH OF string/array. This is not C
-    "==", ">", "<", "<=", "=<", ">=", "=>", 
+    "==", ">", "<", "<=", "=<", ">=", "=>",
     "!=", "<>", "><", -- not equal
     "=", ":=", -- assign
     "AND", "OR", "NOT",
@@ -576,8 +575,9 @@ local function _fnsubstrright(str, n)
     return "~"..__checkstring(str):sub(-__checknumber(n))
 end
 
-local function _fnlen(str)
-    return #__checkstring(str)
+local function _fnlen(var)
+    local value = __readvar(var)
+    return #value
 end
 
 local function _fnloge(n)
@@ -884,18 +884,6 @@ function _opurshift(lval, rval)
     return bit.rshift(l, r)
 end
 
-function _opsizeof(ttarget)
-    local target = __readvar(ttarget)
-
-    if type(target) == "table" then
-        -- TODO return dimensional size
-        return #target
-    else
-        _TBASIC._ERROR.ILLEGALARG("string or array", type(lval))
-        return
-    end
-end
-
 function _opland(lhand, rhand)
     return booleanise(__readvar(lhand) and __readvar(rhand))
 end
@@ -1072,7 +1060,6 @@ _G._TBASIC.LUAFN = {
     ["="]   = {_opassign, 2}, [":="] = {_opassign, 2},
     ["+="]  = {_opplusassign, 2}, ["-="] = {_opminusassign, 2},
     ["*="]  = {_optimesassign, 2}, ["/="] = {_opdivassign, 2}, ["%="] = {_opmodassign, 2},
-    SIZEOF  = {_opsizeof, 1},
     MINUS   = {_opunaryminus, 1},
     -- logical operators
     AND     = {_opland, 2},
@@ -1117,11 +1104,11 @@ local opprecedence = {
     {"+", "-"},
     {"*", "/", "%"},
     {"NOT", "!"},
-    {"^", "SIZEOF"}, -- most important
+    {"^"}, -- most important
     {"MINUS"}
 }
 local opassoc = {
-    rtl = {";", "^", "NOT", "!", "SIZEOF"}
+    rtl = {";", "^", "NOT", "!"}
 }
 local function exprerr(token)
     _TBASIC._ERROR.SYNTAXAT(token)
