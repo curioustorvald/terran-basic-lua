@@ -98,9 +98,8 @@ do -- Avoid heap allocs for performance
         -- (This is starting to get dirty...)
 
         -- unary minus
-        local matchobj = line:find("%-[0-9]")
-        if matchobj then -- in this pattern, it always returns a number
-            local newline = line:sub(1, matchobj - 1) .. "MINUS " .. line:sub(matchobj + 1, #line)
+        for matchobj in line:gmatch("%-[0-9]+") do
+            local newline = line:gsub(matchobj, "MINUS "..matchobj:sub(2, #matchobj))
             line = newline
         end
         -- conditional for IF
