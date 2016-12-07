@@ -108,6 +108,7 @@ _G._TBASIC._ERROR = {
     NEXTWOFOR = function() _TBASIC._INVOKEERR("NEXT WITHOUT FOR") end,
     ASGONIF = function() _TBASIC._INVOKEERR("ASSIGNMENT ON IF CLAUSE") end,
     SHELLCMD = function() _TBASIC._INVOKEERR("THIS IS A SHELL COMMAND") end,
+    IOERR = function() _TBASIC._INVOKEERR("READ/WRITE") end,
 
     DEV_FUCKIT = function() _TBASIC._INVOKEERR("FEELING DIRTY") end,
     DEV_UNIMPL = function(fname) _TBASIC._INVOKEERR("UNIMPLEMENTED SYNTAX:", "'"..fname.."'") end
@@ -682,7 +683,6 @@ local function _fninput(...) -- INPUT(var1, [var2, var3 ...])
         end
     end
 end
-
 
 
 

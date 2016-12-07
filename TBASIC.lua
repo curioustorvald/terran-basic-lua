@@ -55,6 +55,15 @@ else
 
     local lines = {}
 
+    local linenum_match = "[0-9]+ "
+
+    local get_linenum = function(line) return line:sub(1,6):match(linenum_match, 1) end -- line:sub(1,6) limits max linumber to be 99999
+    local split_num_and_statements = function(line)
+        local linenum = get_linenum(line)
+        local statements = line:sub(#linenum + 1)
+        return tonumber(linenum), statements
+    end
+    
     while not terminate_app do
         local __read = false
         line = io.read()
@@ -66,13 +75,19 @@ else
         end
 
 
+        -- TODO more elegant code than IF-ELSEIF-ELSE
+
         -- massive if-else for running command, cos implementing proper command executor is too expensive here
-        if args[1] == "NEW" then
+        if line:sub(1,6):match(linenum_match) then -- enter new command
+            local linenum, statements = split_num_and_statements(line)
+            lines[tonumber(linenum)] = statements
+            __read = true
+        elseif args[1] == "NEW" then
             lines = {}
         elseif args[1] == "RUN" then
             _TBASIC.EXEC(concat_lines(lines))
         elseif args[1] == "LIST" then -- LIST, LIST 42, LIST 10-80
-               if not args[2] then
+            if not args[2] then
                 print(concat_lines(lines))
             else
                 if args[2]:match("-") then -- ranged
@@ -89,11 +104,11 @@ else
                         print(concat_lines(lines, rangestart, rangeend))
                     end
                 else
-                    local lineno = tonumber(args[2])
-                    if not lineno then
+                    local linenum = tonumber(args[2])
+                    if not linenum then
                         _TBASIC._ERROR.ILLEGALARG()
                     else
-                        print(concat_lines(lines, lineno, lineno))
+                        print(concat_lines(lines, linenum, linenum))
                     end
                 end
             end
@@ -119,37 +134,87 @@ else
                         end
                     end
                 else
-                    local lineno = tonumber(args[2])
-                    if not lineno then
+                    local linenum = tonumber(args[2])
+                    if not linenum then
                         _TBASIC._ERROR.ILLEGALARG()
                     else
-                        lines[lineno] = nil
+                        lines[linenum] = nil
                     end
                 end
             end
         elseif args[1] == "EXIT" then
             terminate_app = true
             break
-        elseif line:sub(1,6):match("[0-9]+ ") then -- enter new command (this limits max linumber to be 99999)
-            local lineno = line:sub(1,6):match("[0-9]+ ", 1) -- ditto
-            local statement = line:sub(#lineno + 1)
-            lines[tonumber(lineno)] = statement
-            __read = true
+        elseif args[1] == "SAVE" then
+            local status, err = pcall(function()
+                        if fs and fs.open then -- computercraft
+                            local file = fs.open(args[2], "w")
+                            file.write(concat_lines(lines))
+                            file.close()
+                        else
+                            local file = assert(io.open(args[2], "w"))
+                            file:write(concat_lines(lines))
+                            file:close()
+                        end
+                    end
+                )
+            if err then
+                if _TBASIC.SHOWLUAERROR then
+                    print(err)
+                end
+                _TBASIC._ERROR.IOERR()
+            else
+                error("FILE SAVED")
+            end
+        elseif args[1] == "LOAD" then
+            local status, err = pcall(function()
+                        lines = {}
+                        if fs and fs.open then -- computercraft
+                            local file = fs.open(args[2], "r")
+                            local data = file.readAll("*all")
+                            for dataline in data:gmatch("[^\n]+") do
+                                if #dataline > 0 then
+                                    local linenum, statements = split_num_and_statements(dataline)
+                                    lines[linenum] = statements
+                                end
+                            end
+                            file.close()
+                        else
+                            local file = assert(io.open(args[2], "r"))
+                            local data = file:read("*all")
+                            for dataline in data:gmatch("[^\n]+") do
+                                if #dataline > 0 then
+                                    local linenum, statements = split_num_and_statements(dataline)
+                                    lines[linenum] = statements
+                                end
+                            end
+                            file:close()
+                        end
+                    end
+                )
+            if err then
+                if _TBASIC.SHOWLUAERROR then
+                    error(err)
+                end
+                _TBASIC._ERROR.IOERR()
+            else
+                print("FILE LOADED")
+            end
         elseif args[1] == "RENUM" then
             local statement_table = {}
             local renumbering_table = {}
-            local new_lineno_counter = 10
+            local new_linenum_counter = 10
             -- first, get the list of commands, without line number indexing
             for i = 1, _TBASIC._INTPRTR.MAXLINES do
                 if lines[i] ~= nil then
                     --table.insert(statement_table, lines[i])
-                    statement_table[new_lineno_counter] = lines[i]
-                    renumbering_table[i] = new_lineno_counter
+                    statement_table[new_linenum_counter] = lines[i]
+                    renumbering_table[i] = new_linenum_counter
 
                     -- test
-                    --print("old line", i, "new line", new_lineno_counter)
+                    --print("old line", i, "new line", new_linenum_counter)
 
-                    new_lineno_counter = new_lineno_counter + 10
+                    new_linenum_counter = new_linenum_counter + 10
                 end
             end
             -- copy statement_table into lines table
