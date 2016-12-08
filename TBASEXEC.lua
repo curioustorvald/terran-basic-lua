@@ -73,15 +73,12 @@ do -- Avoid heap allocs for performance
     function parsewords(line)
         if line == nil then return end
 
-        local has_if_statement = false
-
         -----------------------
         -- check line sanity --
         -----------------------
 
         -- filter for IF statement
-        if line:sub(1, 2):match("[Ii][Ff]") then
-            has_if_statement = true
+        if line:sub(1, 2):upper() == "IF" then
             -- no matching THEN
             if not line:match("[Tt][Hh][Ee][Nn]") then
                 _TBASIC._ERROR.NOMATCHING("IF", "THEN")
@@ -104,8 +101,8 @@ do -- Avoid heap allocs for performance
         end
         -- conditional for IF
         -- if IF statement has no appended paren
-        if has_if_statement and not line:match("[Ii][Ff][ ]*%(") then
-            local newline = line:gsub("[Ii][Ff]", "IF ( "):gsub("[Tt][Hh][Ee][Nn]", " ) THEN")
+        if line:sub(1, 2):upper() == "IF" and not line:match("[Ii][Ff][ ]*%(") then
+            local newline = line:gsub("[Ii][Ff]", "IF ( ", 1):gsub("[Tt][Hh][Ee][Nn]", " ) THEN", 1)
             line = newline
         end
         -- special treatment for FOR
