@@ -164,7 +164,7 @@ else
                 end
                 _TBASIC._ERROR.IOERR()
             else
-                error("FILE SAVED")
+                print("FILE SAVED")
             end
         elseif args[1] == "LOAD" then
             local status, err = pcall(function()
