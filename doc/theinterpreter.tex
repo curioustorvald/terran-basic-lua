@@ -1,0 +1,76 @@
+This chapter describes about the reference interpreter.
+
+\section{Implementaion}
+
+The interpreter does not do things like translating BASIC statement to Lua statement, instead it executes the statements using simple virtual machine. The virtual machine (TBASEXEC.lua) first reads the BASIC statements, tokenises them and convert them to Reverse Polish Notation to build command stack, and executes the stack.
+
+
+\section{Configuration}
+
+Reference interpreter provides some properties that can be configured.
+
+\begin{tabularx}{\textwidth}{l c X}
+    \textbf{Field} & \textbf{Default} & \textbf{Description}
+    \\
+    \endhead
+    _TBASIC._INTPRTR.MAXLINES & 63999 & Maximum line number permitted
+    \\
+    _TBASIC._INTPRTR.STACKMAX & 2000 & Maximum depth for the call stack
+\end{tabularx}
+
+You can modify these valueu by modifying \code{_G._TBASIC._INTPRTR.RESET} function in \code{TBASINCL.lua}.
+
+On the code, there's a part that is \code{local debug = false}. If you set the variable to \emph{true}, \code{TBASEXEC} will print out its lexer status, \code{TBASINCL} will print out intermediate states for RPN converter.
+
+
+\chapter{Language Extension}
+
+Reference interpreter provides language extension, you can define your own functions, operators and their precedence and associativity.
+
+
+\section{Conventions}
+
+Basically, any argements passed to your Lua function are \emph{variable names}, so you must resolve them. To read from the variable, simply use function \code{__readvar(varname)}.
+
+To filter out a number from the argument, use \code{__checknumber(varname)}, for a string, use \code{__checkstring(varname)}. These functions uses __readvar() internally, so you don't have to write like \code{__checknumber(__readvar(foo))}.
+
+To ensure the type of an argument, use \code{__assert(arg, expected_type)}. \code{arg} is an argument (which is usually a name of a variable) and \code{expected_type} is Lua data type, written in string. For operators that takes left-hand and right-hand values, you can use \code{__assertland()} and \code{__assertrhand()}.
+
+\section{Adding New Function}
+
+Reference interpreter stores function names separately as collective table called \code{_TBASIC._FNCTION}, as well as \code{_TBASIC.LUAFN}, which stores Lua function (the actor) and number of arguments.
+
+First you must implement that function. They need to be reside in a single Lua function, and their name should start with \code{_fn}.
+
+You will be adding the name of your new function (in all uppercase) to \code{_TBASIC._FNCTION}. Just add the following line:
+
+\begin{codeblock}
+table.insert(_TBASIC._FNCTION, YOUR_NEW_FUNCTION_NAME)
+\end{codeblock}
+
+And you add the description of your new function to \code{_TBASIC.LUAFN}.
+
+\begin{codeblock}
+_TBASIC.LUAFN.YOUR_NEW_FUNCTION_NAME = {_fnyour_new_function_impl, argument_count}
+\end{codeblock}
+
+\code{argument_count} is an integer that is equal to or greater than 0. If you want variable number of arguments, use \code{vararg}. Note that this is not a string, it's a variable (magic number) pre-defined in the extension file. Its actual value is -13.
+
+\subsection{Example code}
+~
+We will define a new function called \code{UPGOER}. What it does is it prints \emph{Up-goer (number) goes up!}, and takes one argument.
+
+\begin{codeblock}
+-- actual function that does the job
+local function _fnupgoer(n)
+	print("Up-goer "..__checknumber(n).." goes up!")
+end
+
+-- add the word UPGOER to word list
+table.insert(_TBASIC._FNCTION, "UPGOER")
+
+-- add the actual function '_fnupgoer' and its number of arguments (1) to
+-- '_TBASIC.LUAFN'.  'UPGOER' part should match with the word you just
+-- inserted to _TBASIC._FNCTION.
+_TBASIC.LUAFN.UPGOER = {_fnupgoer, 1}
+\end{codeblock}

@@ -22,6 +22,7 @@
 \usepackage{ltablex}
 \usepackage{parskip}
 \usepackage{multicol}
+\usepackage{soul}
 
 \usepackage{lineno} % debug
 
@@ -75,9 +76,11 @@
 \renewcommand{\section}[1]{\oldsection{#1} \vskip\baselineskip}
 
 
+\definecolor{lgrey}{HTML}{eeeeee}
+\sethlcolor{lgrey}
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
-\newcommand{\mono}[1]{{\monofont #1}}
-\newcommand{\monobf}[1]{{\monofont \textbf{#1}}}
+\newcommand{\code}[1]{{\monofont\hl{#1}}}
+\newcommand{\codebf}[1]{{\monofont \textbf{\hl{#1}}}}
 
 
 %\aliaspagestyle{part}{empty}
@@ -134,6 +137,10 @@
 \input{functions}
 
 
+\chapter{Errors}
+\input{errors}
+
+
 \chapter{Implementation}
 \input{implementation}
 
@@ -141,6 +148,7 @@
 % http://www.commodore.ca/manuals/pdfs/Commodore_Basic_4_Users_Reference%20Manual.pdf
 % http://www.lua.org/manual/5.2/contents.html#contents
 % https://en.wikipedia.org/wiki/BASIC
+% http://www.commodore.ca/manuals/pdfs/commodore_error_messages.pdf
 
 
 \chapter{Index}

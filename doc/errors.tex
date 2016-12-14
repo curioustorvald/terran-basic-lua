@@ -1,0 +1,13 @@
+This chapter describes errors defined in TBASIC.
+
+\section{Error Description}
+
+\subsection{SYNTAX} error denotes that TBASIC could not recognize the statement you have entered. Caused by things like missing parenthesis, illegal characters, incorrect punctuation, misspelled keyword, etc.
+
+\subsection{<TYPE> EXPECTED, GOT <OTHERTYPE>} error denotes that the statement expected certain type(s) as one of its argument, but got unsupported other type.
+
+\subsection{RETURN WITHOUT GOSUB} error denotes that RETURN statement is met, but GOSUB was not used before (or used up), and TBASIC does not know where to return.
+
+\subsection{NEXT WITHOUT FOR} error denotes that NEXT statement is met, but FOR was not used, and TBASIC does not know where to return.
+
+\subsection{ASSIGNMENT ON IF CLAUSE} error denotes that you have put assignment between IF and THEN. Usually caused by mistakenly typing \code{=} instead of \code{==}.
