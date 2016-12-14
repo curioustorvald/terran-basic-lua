@@ -32,6 +32,16 @@ table.concat = function(t, delimeter)
     return outstr
 end
 
+-- Copy from TBASINCL; looks like OpenComputers has a bug...
+function string_hash(str)
+    local hash = 2166136261
+    for i = 1, #str do
+        hash = hash * 16777619
+        hash = bit.bxor(hash, str:byte(i))
+    end
+    return hash
+end
+
 
 
 
@@ -67,7 +77,7 @@ do -- Avoid heap allocs for performance
         end
     end
     -- sort them out using ther hash for binary search
-    table.sort(tokens, function(a, b) return string.hash(a) < string.hash(b) end)
+    table.sort(tokens, function(a, b) return string_hash(a) < string_hash(b) end)
 
 
     function parsewords(line)
@@ -156,7 +166,7 @@ do -- Avoid heap allocs for performance
 
         -- return: lookless_count on success, nil on failure
         local function isdelimeter(string)
-            local cmpval = function(table_elem) return string.hash(table_elem) end
+            local cmpval = function(table_elem) return string_hash(table_elem) end
             local lookless_count = #string
             local ret = nil
             repeat
