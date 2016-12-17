@@ -125,6 +125,7 @@ _G._TBASIC._FNCTION = {
     "FOR", "NEXT", "IN",
     "DO", -- reserved only
     "IF", "THEN",
+    "LABEL", -- line number alias
     --"ELSE", "ELSEIF", -- reserved only, will not be implemented
     "END", -- terminate program cleanly
     "ABORT", -- break as if an error occured
@@ -225,6 +226,7 @@ _G._TBASIC._INTPRTR.RESET = function()
     _TBASIC._INTPRTR.VARTABLE = {} -- table of variables. [NAME] = data
     _TBASIC._INTPRTR.FNCTABLE = {} -- table of functions. [NAME] = array of strings? (TBA)
     _TBASIC._INTPRTR.CALLSTCK = {} -- return points (line number)
+    _TBASIC._INTPRTR.LINELABL = {} -- LABEL statement table
     _TBASIC._INTPRTR.STACKMAX = 2000
     _TBASIC._INTPRTR.CNSTANTS = {
         M_PI    = 3.141592653589793, -- this is a standard implementation
@@ -409,9 +411,14 @@ local function _fnprint(...)
 end
 
 local function _fngoto(lnum)
-    local linenum = __checknumber(lnum)
+    local linenum = nil
+    if _TBASIC.isnumber(lnum) then
+        linenum = __checknumber(lnum)
+    else
+        linenum = _TBASIC._INTPRTR.LINELABL[__checkstring(lnum)]
+    end
 
-    if linenum < 1 then
+    if linenum == nil or linenum < 1 then
         _TBASIC._ERROR.NOSUCHLINE(linenum)
         return
     end
@@ -424,7 +431,12 @@ local function _fnnewvar(varname, value)
 end
 
 local function _fngosub(lnum)
-    local linenum = __checknumber(lnum)
+    local linenum = nil
+    if _TBASIC.isnumber(lnum) then
+        linenum = __checknumber(lnum)
+    else
+        linenum = _TBASIC._INTPRTR.LINELABL[__checkstring(lnum)]
+    end
 
     stackpush(_TBASIC._INTPRTR.CALLSTCK, _TBASIC._INTPRTR.PROGCNTR) -- save current line number
     _fngoto(linenum)
@@ -682,6 +694,10 @@ local function _fninput(...) -- INPUT(var1, [var2, var3 ...])
             end
         end
     end
+end
+
+local function _fnlabel(lname)
+    _TBASIC._INTPRTR.LINELABL[__checkstring(lname)] = _TBASIC._INTPRTR.PROGCNTR
 end
 
 
@@ -1010,6 +1026,7 @@ _G._TBASIC.LUAFN = {
     ABORTM  = {_fnabortmsg, 1},
     FOR     = {_fnfor, 1},
     NEXT    = {_fnnext, vararg},
+    LABEL   = {_fnlabel, 1},
     -- stdio
     PRINT   = {_fnprint, vararg},
     INPUT   = {_fninput, vararg},
