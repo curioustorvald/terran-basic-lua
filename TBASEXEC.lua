@@ -93,7 +93,7 @@ do -- Avoid heap allocs for performance
             if not line:match("[Tt][Hh][Ee][Nn]") then
                 _TBASIC._ERROR.NOMATCHING("IF", "THEN")
             -- assignment on IF clause
-            elseif line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match("[^=]=[^=]") or
+            elseif line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match("[^=+%-*/%%<>!]=[^=<>]") or
                    line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match(":=") then
                 _TBASIC._ERROR.ASGONIF()
             end
