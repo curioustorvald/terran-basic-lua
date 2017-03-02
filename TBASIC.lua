@@ -4,6 +4,9 @@ TBASIC shell
 Synopsis: TBASIC (filename)
 If no file is specified, interactive mode will be started
 
+
+To debug EXEC and/or INCL, there's line ```local debug = false``` on each file; change it to ```true``` manually
+and you are all set.
 ]]
 
 
@@ -66,10 +69,10 @@ else
     
     while not terminate_app do
         local __read = false
-        line = io.read()
+        local line = io.read()
 
         -- tokenise line by " "
-        args = {}
+        local args = {} -- shadows system args
         for word in line:gmatch("[^ ]+") do
             table.insert(args, word:upper())
         end
@@ -91,7 +94,7 @@ else
                 print(concat_lines(lines))
             else
                 if args[2]:match("-") then -- ranged
-                    range = {}
+                    local range = {}
                     for n in args[2]:gmatch("[^-]+") do
                         table.insert(range, n)
                     end
@@ -119,7 +122,7 @@ else
                 _TBASIC._ERROR.ILLEGALARG()
             else
                 if args[2]:match("-") then -- ranged
-                    range = {}
+                    local range = {}
                     for n in args[2]:gmatch("[^-]+") do
                         table.insert(range, n)
                     end

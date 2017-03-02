@@ -1329,7 +1329,7 @@ _G._TBASIC.TORPN = function(exprarray)
 
             -- stack empty without finding left paren, ERROR!
             --if not found_left_paren and #stack == 0 then exprerr(token) end -- mismatched parens
-        elseif isstring(token) then
+        elseif isstring(token) or isnumber(token) then
             printdbg("is data")
             stackpush(outqueue, token) -- arbitrary data
         else -- a word without '~' or anything; assume it's a variable name
