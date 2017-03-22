@@ -109,6 +109,7 @@ _G._TBASIC._ERROR = {
     ASGONIF = function() _TBASIC._INVOKEERR("ASSIGNMENT ON IF CLAUSE") end,
     SHELLCMD = function() _TBASIC._INVOKEERR("THIS IS A SHELL COMMAND") end,
     IOERR = function() _TBASIC._INVOKEERR("READ/WRITE") end,
+    NOSYMFORNEXT = function() _TBASIC._INVOKEERR("NO VAR FOR NEXT CLAUSE") end,
 
     DEV_FUCKIT = function() _TBASIC._INVOKEERR("FEELING DIRTY") end,
     DEV_UNIMPL = function(fname) _TBASIC._INVOKEERR("UNIMPLEMENTED SYNTAX:", "'"..fname.."'") end
@@ -490,6 +491,12 @@ local function _fnnext(...)
     end
 
     local variables = {...} -- array of strings(varname) e.g. "$X, $Y, $Z"
+
+    -- error if no symbol is specified (a common "mistake")
+    if #variables == 0 then
+        _TBASIC._ERROR.NOSYMFORNEXT()
+    end
+
     local branch = false
     -- dequeue intsequences
     for i, v in ipairs(variables) do
