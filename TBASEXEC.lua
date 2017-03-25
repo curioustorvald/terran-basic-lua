@@ -141,7 +141,7 @@ do -- Avoid heap allocs for performance
 
 
 
-        printdbg("parsing line", line)
+        printdbg("\nparsing line", line)
 
 
 
@@ -256,6 +256,7 @@ do -- Avoid heap allocs for performance
     end
 
     local isvariable = _TBASIC.isvariable
+    local isarray  = _TBASIC.isarray
     local isnumber = _TBASIC.isnumber
     local isstring = _TBASIC.isstring
 
@@ -298,7 +299,7 @@ do -- Avoid heap allocs for performance
             end
 
             printdbg("--> execword_outarg", table.unpack(args))
-            result = _TBASIC.LUAFN[word][1](table.unpack(args))
+            local result = _TBASIC.LUAFN[word][1](table.unpack(args))
 
             printdbg("--> result", result)
             stackpush(execstack, result)
@@ -306,8 +307,8 @@ do -- Avoid heap allocs for performance
     end
 
     function printdbg(...)
-        local debug = false
-        if debug then print("DBG", ...) end
+        local debug = true--false
+        if debug then print("TBASEXEC", ...) end
     end
 
 
@@ -324,6 +325,7 @@ do -- Avoid heap allocs for performance
             * "@" - user-defined functions
             * "$" - variables (builtin constants and user-defined) -- familiar, eh?
             * "#" - operators
+            * "%" - arrays
             * "~" - strings
             * none prepended - data (number or string)
             ]]
@@ -395,6 +397,33 @@ do -- Avoid heap allocs for performance
                     elseif isvariable(word) then
                         printdbg("is variable")
                         stackpush(execstack, word) -- push raw variable ($ sign retained)
+                    elseif isarray(word) then
+                        printdbg("is array")
+
+                        -- stack: ARR(3,2,5)      -> 3 2 5 %ARR
+                        --        ARR(3,2,5) = 42 -> 3 2 5 [42] %ARR &=
+                        --        ARR(0,1,2) = ARR(10,11,12) -> 0 1 2 [10 11 12 %ARR]
+
+                        -- consume entire stack for array indices
+                        local arrayargs = {}
+                        local reversedargs = {}
+
+                        while #execstack > 0 and
+                                (isvariable(stackpeek(execstack)) or isnumber(stackpeek(execstack)))
+                        do
+                            stackpush(reversedargs, stackpop(execstack))
+                        end
+                        -- reverse 'args'
+                        while #reversedargs > 0 do
+                            stackpush(arrayargs, stackpop(reversedargs))
+                        end
+
+
+                        print(word.."("..table.concat(arrayargs, ",")..")")
+
+
+
+
                     else
                         printdbg("is data")
                         stackpush(execstack, word) -- push number or string

@@ -246,6 +246,7 @@ end
 -- FUNCTION IMPLEMENTS --------------------------------------------------------
 
 local function __readvar(varname)
+    -- varname could be either real name, or a data
     -- if varname is a string that can be represented as number, returns tonumber(varname) ("4324" -> 4324)
     -- if varname is a TBASIC string, return resolved string ("~FOOBAR" -> "FOOBAR")
     -- if varname is a TBASIC variable, return resolved variable ("$FOO" -> any value stored in variable 'FOO')
@@ -275,9 +276,96 @@ local function __readvar(varname)
             -- try for variable table
             else return _TBASIC._INTPRTR.VARTABLE[data:upper()] end
         end
+    elseif varname:byte(1) == 37 then
+        local array = _TBASIC._INTPRTR.VARTABLE[varname:sub(2, #varname):upper()]
+        if not array then
+            return false
+        elseif array.identifier == "tbasicarray" then
+            return array
+        else
+            error(varname.." is not an TBASIC array")
+        end
     else
         return varname -- already resolved
     end
+end
+
+local function __makenewtbasicarray(dimensional)
+    local t = {}
+    t.dimension = dimensional
+    t.data = {} -- this data WILL BE one-based whilst TBASIC is zero-based. BEWARE!
+    t.identifier = "tbasicarray"
+
+    local dimensionSum = 0
+    for _, v in ipairs(dimensional) do
+        dimensionSum = dimensionSum + v
+    end
+
+    -- allocate table
+    for i = 1, dimensionSum do
+        t.data[i] = nil
+    end
+
+    return t
+end
+
+-- ARRNAME(3,2,4), arguments denote max possible index, starting from zero
+function gfnarrayget(arrname, ...)
+    local t = __readvar(arrname)
+
+    local function getdimensionalsum(iteration)
+        local i = 0
+        for dim = iteration, (#t.dimension) - 1 do
+            i = i + t.dimension[dim]
+        end
+        return i
+    end
+
+    local indices = {...}
+    local actualIndex = 0
+    for d = 1, #indices do
+        if (d < #indices) then
+            actualIndex = actualIndex + getdimensionalsum(d) * indices[d]
+        else
+            actualIndex = actualIndex + indices[d]
+        end
+    end
+
+    return t.data[actualIndex + 1] -- actualIndex is zero-based, but t.data is one-based
+end
+
+function gfnarrayset(arrname, ...)
+    local t = __readvar(arrname)
+
+    local function getdimensionalsum(iteration)
+        local i = 0
+        for dim = iteration, (#t.dimension) - 1 do
+            i = i + t.dimension[dim]
+        end
+        return i
+    end
+
+    local args = {...}
+    local indices = {}
+    local value = nil
+    for i, v in ipairs(args) do
+        if i < #args then
+            indices[i] = v
+        else
+            value = v
+        end
+    end
+
+    local actualIndex = 0
+    for d = 1, #indices do
+        if (d < #indices) then
+            actualIndex = actualIndex + getdimensionalsum(d) * indices[d]
+        else
+            actualIndex = actualIndex + indices[d]
+        end
+    end
+
+    t.data[actualIndex + 1] = value -- actualIndex is zero-based, but t.data is one-based
 end
 
 local function __assert(aarg, expected)
@@ -707,6 +795,20 @@ local function _fnlabel(lname)
     _TBASIC._INTPRTR.LINELABL[__checkstring(lname)] = _TBASIC._INTPRTR.PROGCNTR
 end
 
+-- dim(max_index, max_index, ...)
+local function _fndim(...)
+    local args = {...}
+    local varname = args[1]
+    local dimensional = {}
+    for i, v in ipairs(args) do
+        if i > 1 then
+            dimensional[i - 1] = v + 1 -- stores size, not max_index
+        end
+    end
+
+    _opassign(varname, __makenewtbasicarray(dimensional))
+end
+
 
 
 -- OPERATOR IMPLEMENTS --------------------------------------------------------
@@ -786,7 +888,7 @@ function _opassign(var, value)
         return
     end
 
-    -- remove missed "$"
+    -- remove uncaught "$"
     local varname = var:byte(1) == 36 and var:sub(2, #var) or var
 
     -- if it still has "$", the programmer just broke the law
@@ -1022,6 +1124,7 @@ local vararg = -13 -- magic
 _G._TBASIC.LUAFN = {    
     -- variable control
     CLR     = {function() _TBASIC._INTPRTR.VARTABLE = {} end, 0},
+    DIM     = {_fndim, vararg},
     -- flow control
     IF      = {_fnif, 1},
     THEN    = {_fnnop, 0},
@@ -1224,6 +1327,15 @@ function _G._TBASIC.isstring(token)
     return token:byte(1) == 126
 end
 
+function _G._TBASIC.isarray(token)
+    if token:byte(1) == 37 then
+        return true
+    else
+        local var = __readvar("%"..token)
+        return type(var) == "table" and var.identifier == "tbasicarray"
+    end
+end
+
 
 
 local function printdbg(...)
@@ -1255,6 +1367,7 @@ _G._TBASIC.TORPN = function(exprarray)
     local isargsep   = _TBASIC.isargsep
     local isnumber   = _TBASIC.isnumber
     local isstring   = _TBASIC.isstring
+    local isarray    = _TBASIC.isarray
 
     for _, token in ipairs(exprarray) do--expr:gmatch("[^ ]+") do
         if token == nil then error("Token is nil!") end
@@ -1268,6 +1381,10 @@ _G._TBASIC.TORPN = function(exprarray)
             printdbg("is function")
 
             stackpush(stack, "&"..token:upper())
+        elseif isarray(token:upper()) then
+            printdbg("is array")
+
+            stackpush(stack, "%"..token:upper())
         elseif isargsep(token) then
             printdbg("is argument separator")
 
