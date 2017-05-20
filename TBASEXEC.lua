@@ -82,19 +82,26 @@ do -- Avoid heap allocs for performance
 
     function parsewords(line)
         if line == nil then return end
+        local upperline = line:upper()
 
         -----------------------
         -- check line sanity --
         -----------------------
 
+        -- filter internal-use-only functions/operators (aka OPCODES)
+        for _, opcode in ipairs(_G._TBASIC.OPILLEGAL) do
+            if upperline:find(opcode) ~= nil then
+                _TBASIC._ERROR.SYNTAXAT(opcode)
+            end
+        end
         -- filter for IF statement
-        if line:sub(1, 2):upper() == "IF" then
+        if upperline:sub(1, 2) == "IF" then
             -- no matching THEN
-            if not line:match("[Tt][Hh][Ee][Nn]") then
+            if not upperline:match("THEN") then
                 _TBASIC._ERROR.NOMATCHING("IF", "THEN")
             -- assignment on IF clause
-            elseif line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match("[^=+%-*/%%<>!]=[^=<>]") or
-                   line:match("[Ii][Ff][^\n]+[Tt][Hh][Ee][Nn]"):match(":=") then
+            elseif upperline:match("IF[^\n]+THEN"):match("[^=+%-*/%%<>!]=[^=<>]") or
+                   upperline:match("IF[^\n]+THEN"):match(":=") then
                 _TBASIC._ERROR.ASGONIF()
             end
         end
@@ -111,12 +118,12 @@ do -- Avoid heap allocs for performance
         end
         -- conditional for IF
         -- if IF statement has no appended paren
-        if line:sub(1, 2):upper() == "IF" and not line:match("[Ii][Ff][ ]*%(") then
+        if upperline:sub(1, 2) == "IF" and not upperline:match("IF[ ]*%(") then
             local newline = line:gsub("[Ii][Ff]", "IF ( ", 1):gsub("[Tt][Hh][Ee][Nn]", " ) THEN", 1)
             line = newline
         end
         -- special treatment for FOR
-        if line:sub(1, 3):upper() == "FOR" then
+        if upperline:sub(1, 3) == "FOR" then
             if line:match("[0-9]?%.[0-9]") then -- real number used (e.g. "3.14", ".5")
                 _TBASIC._ERROR.ILLEGALARG()
             else
@@ -138,6 +145,18 @@ do -- Avoid heap allocs for performance
                 --     "x FOR" -- see this part? we need extra 'x' to feed for the FOR statement to function
             end
         end
+        -- array assignation
+        -- FROM: arrayname(...) = 42
+        -- TO  : ASSIGNARRAY(%arrayname, 42, ...)
+        if line:match("[a-zA-Z_0-9]+%([0-9]+[, 0-9]*%) ?= ?[^\n]+") then
+            local arrayname = line:match("[a-zA-Z_0-9]+")
+            local dimension = line:match("%([0-9]+[, 0-9]*%)")
+            dimension = dimension:sub(2, #dimension - 1)
+            local assign_value = line:sub(#line:match("[a-zA-Z_0-9]+%([0-9]+[, 0-9]*%) ?= ?") + 1, #line)
+
+            line = "ASSIGNARRAY("..arrayname..","..assign_value..","..dimension..")"
+        end
+
 
 
 
@@ -504,7 +523,7 @@ end
 
 --[[
 Terran BASIC (TBASIC) 
-Copyright (c) 2016 Torvald (minjaesong) and the contributors.
+Copyright (c) 2016-2017 Torvald (minjaesong) and the contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the Software), to deal in the

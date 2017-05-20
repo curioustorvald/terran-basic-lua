@@ -114,7 +114,7 @@ _G._TBASIC._ERROR = {
     DEV_FUCKIT = function() _TBASIC._INVOKEERR("FEELING DIRTY") end,
     DEV_UNIMPL = function(fname) _TBASIC._INVOKEERR("UNIMPLEMENTED SYNTAX:", "'"..fname.."'") end
 }
-_G._TBASIC._FNCTION = {
+_G._TBASIC._FNCTION = { -- aka OPCODES because of some internal-use-only functions
     -- variable control
     "CLR", -- deletes all user-defined variables and functions
     "DIM", -- allocates an array
@@ -176,6 +176,8 @@ _G._TBASIC._FNCTION = {
     -- external IO
     "LOAD", -- file load. Synopsis: "LOAD [filename]"
     "SAVE", -- file save. Synopsis: "SAVE [filename]"
+    -- internal use only!!
+    "ASSIGNARRAY",
 }
 _G._TBASIC._OPERATR = {
     -- operators
@@ -189,8 +191,12 @@ _G._TBASIC._OPERATR = {
     "*", "/", "+", "-", -- arithmetic operations 
     "%", -- math.fmod
     "TO", "STEP", -- integer sequence operator
-    "MINUS", -- unary minus
+    "MINUS", -- unary minus (internal use only!!)
     "+=", "-=", "*=", "/=", "%=" -- C-style assign
+}
+_G._TBASIC.OPILLEGAL = { -- illegal functions and operators (internal-use-only opcodes)
+    "ASSIGNARRAY",
+    "MINUS",
 }
 _G._TBASIC._INTPRTR = {}
 _G._TBASIC._INTPRTR.TRACE = false -- print program counter while execution
@@ -278,7 +284,7 @@ local function __readvar(varname)
         end
     elseif varname:byte(1) == 37 then
         local array = _TBASIC._INTPRTR.VARTABLE[varname:sub(2, #varname):upper()]
-        if not array then
+        if not array or type(array) ~= "table" then
             return false
         elseif array.identifier == "tbasicarray" then
             return array
@@ -295,16 +301,6 @@ local function __makenewtbasicarray(dimensional)
     t.dimension = dimensional
     t.data = {} -- this data WILL BE one-based whilst TBASIC is zero-based. BEWARE!
     t.identifier = "tbasicarray"
-
-    local dimensionSum = 0
-    for _, v in ipairs(dimensional) do
-        dimensionSum = dimensionSum + v
-    end
-
-    -- allocate table
-    for i = 1, dimensionSum do
-        t.data[i] = nil
-    end
 
     return t
 end
@@ -809,6 +805,16 @@ local function _fndim(...)
     _opassign(varname, __makenewtbasicarray(dimensional))
 end
 
+local function _fnassignarray(arrname, value, ...)
+    local index = {...}
+
+
+
+
+
+
+end
+
 
 
 -- OPERATOR IMPLEMENTS --------------------------------------------------------
@@ -1125,6 +1131,7 @@ _G._TBASIC.LUAFN = {
     -- variable control
     CLR     = {function() _TBASIC._INTPRTR.VARTABLE = {} end, 0},
     DIM     = {_fndim, vararg},
+    ASSIGNARRAY = {_fnassignarray, vararg},
     -- flow control
     IF      = {_fnif, 1},
     THEN    = {_fnnop, 0},
@@ -1511,7 +1518,7 @@ _G._TBASIC._INTPRTR.RESET()
 
 --[[
 Terran BASIC (TBASIC) 
-Copyright (c) 2016 Torvald (minjaesong) and the contributors.
+Copyright (c) 2016-2017 Torvald (minjaesong) and the contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the Software), to deal in the
