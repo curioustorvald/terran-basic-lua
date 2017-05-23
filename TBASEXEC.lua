@@ -142,7 +142,7 @@ do -- Avoid heap allocs for performance
                 -- which is executed (in RPN) in steps of:
                 --     "x x 1 10 TO = FOR"
                 --     "x x (arr) = FOR"
-                --     "x FOR" -- see this part? we need extra 'x' to feed for the FOR statement to function
+                --     "x FOR" -- see this part? we need extra 'x' to feed in to make the FOR statement work
             end
         end
         -- array assignation

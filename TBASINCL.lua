@@ -84,7 +84,6 @@ _G._TBASIC._ERROR = {
     NULVAR = function(var) _TBASIC._INVOKEERR("UNDEFINED VARIABLE:", "'"..var.."'") end,
     DIV0 = function() _TBASIC._INVOKEERR("DIVISION BY ZERO") end,
     NAN = function() _TBASIC._INVOKEERR("NOT A NUMBER") end,
-    INDETERMINANT = function() _TBASIC._INVOKEERR("INDETERMINANT MATH") end, -- 0^0 is NOT indeterminant, it's 1. This is the language spec.
     STACKOVFL = function() _TBASIC._INVOKEERR("TOO MANY RECURSION") end,
     LINETOOBIG = function() _TBASIC._INVOKEERR("TOO BIG LINE NUMBER") end,
     NOLINENUM = function() _TBASIC._INVOKEERR("NO LINE NUMBER") end,
@@ -178,12 +177,13 @@ _G._TBASIC._FNCTION = { -- aka OPCODES because of some internal-use-only functio
     "SAVE", -- file save. Synopsis: "SAVE [filename]"
     -- internal use only!!
     "ASSIGNARRAY",
+    "READARRAY",
 }
 _G._TBASIC._OPERATR = {
     -- operators
     ">>>", "<<", ">>", "|", "&", "XOR", "!", -- bitwise operations
     ";", -- string concatenation
-    "==", ">", "<", "<=", "=<", ">=", "=>",
+    "==", ">", "<", "<=", "=<", ">=", "=>", -- TURN OFF your font ligature for this part if you're seeing two identical symbols!
     "!=", "<>", "><", -- not equal
     "=", ":=", -- assign
     "AND", "OR", "NOT",
@@ -196,6 +196,7 @@ _G._TBASIC._OPERATR = {
 }
 _G._TBASIC.OPILLEGAL = { -- illegal functions and operators (internal-use-only opcodes)
     "ASSIGNARRAY",
+    "READARRAY",
     "MINUS",
 }
 _G._TBASIC._INTPRTR = {}
@@ -217,7 +218,7 @@ local function stackpeek(t)
     return v
 end
 
-function string.hash(str)
+function string.hash(str) -- FNV-1 32-bit
     local hash = 2166136261
     for i = 1, #str do
         hash = hash * 16777619
@@ -229,7 +230,7 @@ end
 _G._TBASIC._INTPRTR.RESET = function()
     _TBASIC.__appexit = false
     _TBASIC._INTPRTR.PROGCNTR = 0
-    _TBASIC._INTPRTR.MAXLINES = 63999
+    _TBASIC._INTPRTR.MAXLINES = 999999
     _TBASIC._INTPRTR.VARTABLE = {} -- table of variables. [NAME] = data
     _TBASIC._INTPRTR.FNCTABLE = {} -- table of functions. [NAME] = array of strings? (TBA)
     _TBASIC._INTPRTR.CALLSTCK = {} -- return points (line number)
@@ -330,7 +331,7 @@ function gfnarrayget(arrname, ...)
     return t.data[actualIndex + 1] -- actualIndex is zero-based, but t.data is one-based
 end
 
-function gfnarrayset(arrname, ...)
+function gfnarrayset(arrname, value, ...)
     local t = __readvar(arrname)
 
     local function getdimensionalsum(iteration)
@@ -341,16 +342,7 @@ function gfnarrayset(arrname, ...)
         return i
     end
 
-    local args = {...}
-    local indices = {}
-    local value = nil
-    for i, v in ipairs(args) do
-        if i < #args then
-            indices[i] = v
-        else
-            value = v
-        end
-    end
+    local indices = {...}
 
     local actualIndex = 0
     for d = 1, #indices do
@@ -806,13 +798,11 @@ local function _fndim(...)
 end
 
 local function _fnassignarray(arrname, value, ...)
-    local index = {...}
+    gfnarrayset(arrname, value, ...)
+end
 
-
-
-
-
-
+local function _fnreadarray(arrname, ...)
+    return gfnarrayget(arrname, ...)
 end
 
 
@@ -861,10 +851,7 @@ function _opdiv(lval, rval)
     local l = __checknumber(lval)
     local r = __checknumber(rval)
 
-    if l == 0 and r == 0 then
-        _TBASIC._ERROR.INDETERMINANT()
-        return
-    elseif r == 0 then
+    if r == 0 then
         _TBASIC._ERROR.DIV0()
         return
     else
@@ -1132,6 +1119,7 @@ _G._TBASIC.LUAFN = {
     CLR     = {function() _TBASIC._INTPRTR.VARTABLE = {} end, 0},
     DIM     = {_fndim, vararg},
     ASSIGNARRAY = {_fnassignarray, vararg},
+    READARRY = {_fnreadarray, vararg},
     -- flow control
     IF      = {_fnif, 1},
     THEN    = {_fnnop, 0},
