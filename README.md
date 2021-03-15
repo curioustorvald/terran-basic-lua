@@ -4,7 +4,8 @@ Make BASIC great again
 
 ## BULLETIN
 
-Sorry guys I think I'll be away for years to work on [my own virtualised computer](https://github.com/minjaesong/terran-basic-java-vm) so there will be no update on this project. However I'm still up to pull requests so if you are REALLY interested in this project, consider making pull requests. I appreciate any and all kinds of support.
+### Don't play with this crap
+this project was abandoned years ago; you'd have better luck backporting [my other BASIC](https://github.com/curioustorvald/TerranBASIC) (that actually works, unlike this crap) into Lua instead.
 
 ## Outline
 
